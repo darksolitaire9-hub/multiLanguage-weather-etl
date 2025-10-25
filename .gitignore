@@ -1,0 +1,61 @@
+# ===== AIRFLOW =====
+airflow/airflow.db
+airflow/airflow.db-shm
+airflow/airflow.db-wal
+airflow/logs/
+airflow/webserver_config.py
+airflow/*.pid
+airflow/*.err
+airflow/*.log
+
+# ===== DATA =====
+data/*.db
+data/*.db-journal
+data/*.db-shm
+data/*.db-wal
+data/*.csv
+
+# ===== R =====
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# ===== JULIA =====
+*.jl.*.cov
+*.jl.cov
+*.jl.mem
+Manifest.toml
+
+# ===== PYTHON =====
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# ===== OUTPUTS =====
+outputs/plots/*.png
+outputs/plots/*.pdf
+outputs/reports/*.txt
+outputs/reports/*.csv
+
+# ===== LOGS =====
+logs/
+*.log
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# ===== SYSTEM =====
+Thumbs.db
+desktop.ini
