@@ -3,7 +3,7 @@ set -e
 
 echo "🚀 Setting up Multi-Language Weather ETL environment..."
 
-# Update system first
+# Update system
 sudo apt-get update
 
 # Install uv (Python package manager)
@@ -18,24 +18,19 @@ uv pip install --system apache-airflow==3.0.6 \
     pandas==2.2.3 \
     python-dotenv==1.0.1
 
-# -------------------- INSTALL R MANUALLY --------------------
+# ----------------- INSTALL R MANUALLY -----------------
 echo "📊 Installing R (base) manually..."
 sudo apt-get install -y --no-install-recommends software-properties-common dirmngr gpg wget
-# Try jammy first (for Ubuntu 22.04+, Codespaces often uses jammy now)
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 'E298A3A825C0D65DFD57CBB651716619E084DAB9'
 sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/'
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends r-base
-# If you get errors about jammy, replace above line with focal:
-# sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'
-# sudo apt-get update
-# sudo apt-get install -y --no-install-recommends r-base
 
 # Install R packages
 echo "📊 Installing R packages..."
 sudo Rscript -e "install.packages(c('DBI','RSQLite','ggplot2','dplyr','readr','lubridate'), repos='https://cloud.r-project.org/')"
 
-# ------------------- INSTALL JULIA MANUALLY ----------------
+# ----------------- INSTALL JULIA MANUALLY ----------------
 echo "💎 Installing Julia manually..."
 cd /tmp
 wget https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.0-linux-x86_64.tar.gz
