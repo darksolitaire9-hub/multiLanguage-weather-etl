@@ -3,10 +3,10 @@ set -e
 
 echo "🚀 Setting up Multi-Language Weather ETL environment..."
 
-# Update system
+# Update system first
 sudo apt-get update
 
-# Install uv (modern Python package manager)
+# Install uv (Python package manager)
 echo "📦 Installing uv..."
 curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -18,15 +18,36 @@ uv pip install --system apache-airflow==3.0.6 \
     pandas==2.2.3 \
     python-dotenv==1.0.1
 
+# -------------------- INSTALL R MANUALLY --------------------
+echo "📊 Installing R (base) manually..."
+sudo apt-get install -y --no-install-recommends software-properties-common dirmngr gpg wget
+# Try jammy first (for Ubuntu 22.04+, Codespaces often uses jammy now)
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 'E298A3A825C0D65DFD57CBB651716619E084DAB9'
+sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/'
+sudo apt-get update
+sudo apt-get install -y --no-install-recommends r-base
+# If you get errors about jammy, replace above line with focal:
+# sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'
+# sudo apt-get update
+# sudo apt-get install -y --no-install-recommends r-base
+
 # Install R packages
 echo "📊 Installing R packages..."
-sudo R -e "install.packages(c('DBI', 'RSQLite', 'ggplot2', 'dplyr', 'readr', 'lubridate'), repos='https://cloud.r-project.org/')"
+sudo Rscript -e "install.packages(c('DBI','RSQLite','ggplot2','dplyr','readr','lubridate'), repos='https://cloud.r-project.org/')"
 
-# Install Julia packages
-echo "💎 Installing Julia packages..."
+# ------------------- INSTALL JULIA MANUALLY ----------------
+echo "💎 Installing Julia manually..."
+cd /tmp
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.0-linux-x86_64.tar.gz
+tar -xzf julia-1.10.0-linux-x86_64.tar.gz
+sudo mv julia-1.10.0 /usr/local/julia
+sudo ln -sf /usr/local/julia/bin/julia /usr/local/bin/julia
+rm julia-1.10.0-linux-x86_64.tar.gz
+cd -
+julia --version
 julia -e 'using Pkg; Pkg.add(["DataFrames", "SQLite", "Statistics", "Dates", "CSV"])'
 
-# Create project structure
+# ------------------- CREATE PROJECT STRUCTURE ---------------
 echo "📁 Creating project directories..."
 mkdir -p python
 mkdir -p r
@@ -37,11 +58,10 @@ mkdir -p outputs/plots
 mkdir -p outputs/reports
 mkdir -p logs
 
-# Initialize Airflow with updated configuration
+# ----------------- AIRFLOW CONFIGURATION --------------------
 echo "🌬️ Initializing Airflow 3.0..."
 export AIRFLOW_HOME=$(pwd)/airflow
 
-# Create airflow.cfg with SQLite backend
 cat > airflow/airflow.cfg <<EOL
 [core]
 dags_folder = $(pwd)/airflow/dags
@@ -60,10 +80,8 @@ web_server_port = 8080
 scheduler_heartbeat_sec = 5
 EOL
 
-# Initialize database
 airflow db migrate
 
-# Create Airflow user (username: admin, password: admin)
 airflow users create \
     --username admin \
     --firstname Admin \

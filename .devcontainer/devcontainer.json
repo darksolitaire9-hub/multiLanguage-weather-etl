@@ -1,14 +1,6 @@
 {
   "name": "Multi-Language Weather ETL",
   "image": "mcr.microsoft.com/devcontainers/python:3.12",
-  "features": {
-    "ghcr.io/rocker-org/devcontainer-features/r-apt:latest": {
-      "version": "4.3"
-    },
-    "ghcr.io/devcontainers/features/julia:1": {
-      "version": "1.10"
-    }
-  },
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "customizations": {
     "vscode": {
