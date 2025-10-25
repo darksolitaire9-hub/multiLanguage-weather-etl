@@ -1,6 +1,6 @@
 {
   "name": "Multi-Language Weather ETL",
-  "image": "mcr.microsoft.com/devcontainers/data-science:ubuntu-22.04",
+  "image": "ubuntu:22.04",
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "customizations": {
     "vscode": {
@@ -8,7 +8,8 @@
         "ms-python.python",
         "REditorSupport.r",
         "julialang.language-julia",
-        "ms-toolsai.jupyter"
+        "ms-toolsai.jupyter",
+        "github.vscode-pull-request-github"
       ]
     }
   },
