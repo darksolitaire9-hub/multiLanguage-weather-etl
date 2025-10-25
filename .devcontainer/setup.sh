@@ -1,100 +1,40 @@
 #!/bin/bash
-set -e
+set -euxo pipefail
 
-echo "🚀 Setting up Multi-Language Weather ETL environment..."
+# Update and install core developer tools
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get upgrade -y
+apt-get install -y git curl wget ca-certificates build-essential software-properties-common \
+    locales libssl-dev libcurl4-openssl-dev libxml2-dev \
+    libsqlite3-dev sqlite3 bzip2 unzip
 
-# Update system
-sudo apt-get update
+# Python (ensure python3+pip, uv, venv)
+apt-get install -y python3 python3-pip python3-venv
+pip3 install --upgrade pip uv
 
-# Install uv (Python package manager)
-echo "📦 Installing uv..."
-curl -LsSf https://astral.sh/uv/install.sh | sh
-export PATH="$HOME/.cargo/bin:$PATH"
+# R base install (with dev headers)
+apt-get install -y --no-install-recommends r-base r-base-dev
 
-# Install Python dependencies with uv
-echo "📦 Installing Python packages with uv..."
-uv pip install --system apache-airflow==3.0.6 \
-    requests==2.32.3 \
-    pandas==2.2.3 \
-    python-dotenv==1.0.1
+# Julia latest stable
+JULIA_VER="1.10.3"
+wget -q https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-${JULIA_VER}-linux-x86_64.tar.gz
+tar -xzf julia-${JULIA_VER}-linux-x86_64.tar.gz
+mv julia-${JULIA_VER} /opt/julia
+ln -sf /opt/julia/bin/julia /usr/local/bin/julia
+rm julia-${JULIA_VER}-linux-x86_64.tar.gz
 
-# ----------------- INSTALL R MANUALLY -----------------
-echo "📊 Installing R (base) manually..."
-sudo apt-get install -y --no-install-recommends software-properties-common dirmngr gpg wget
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 'E298A3A825C0D65DFD57CBB651716619E084DAB9'
-sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/'
-sudo apt-get update
-sudo apt-get install -y --no-install-recommends r-base
+# Airflow with Celery, Postgres, SQLite support
+pip3 install "apache-airflow[celery,postgres,sqlite]==2.9.1"
 
-# Install R packages
-echo "📊 Installing R packages..."
-sudo Rscript -e "install.packages(c('DBI','RSQLite','ggplot2','dplyr','readr','lubridate'), repos='https://cloud.r-project.org/')"
+# Register Jupyter kernels for Python, R, Julia
+python3 -m pip install ipykernel
+python3 -m ipykernel install --user --name python3
 
-# ----------------- INSTALL JULIA MANUALLY ----------------
-echo "💎 Installing Julia manually..."
-cd /tmp
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.0-linux-x86_64.tar.gz
-tar -xzf julia-1.10.0-linux-x86_64.tar.gz
-sudo mv julia-1.10.0 /usr/local/julia
-sudo ln -sf /usr/local/julia/bin/julia /usr/local/bin/julia
-rm julia-1.10.0-linux-x86_64.tar.gz
-cd -
-julia --version
-julia -e 'using Pkg; Pkg.add(["DataFrames", "SQLite", "Statistics", "Dates", "CSV"])'
+R -e 'if (!require("IRkernel")) install.packages("IRkernel", repos="https://cloud.r-project.org"); IRkernel::installspec(user = FALSE)'
 
-# ------------------- CREATE PROJECT STRUCTURE ---------------
-echo "📁 Creating project directories..."
-mkdir -p python
-mkdir -p r
-mkdir -p julia
-mkdir -p airflow/dags
-mkdir -p data
-mkdir -p outputs/plots
-mkdir -p outputs/reports
-mkdir -p logs
+julia -e 'using Pkg; Pkg.add("IJulia"); using IJulia; IJulia.notebook()'
 
-# ----------------- AIRFLOW CONFIGURATION --------------------
-echo "🌬️ Initializing Airflow 3.0..."
-export AIRFLOW_HOME=$(pwd)/airflow
+# Clean up apt cache
+apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-cat > airflow/airflow.cfg <<EOL
-[core]
-dags_folder = $(pwd)/airflow/dags
-base_log_folder = $(pwd)/logs
-executor = LocalExecutor
-load_examples = False
-
-[database]
-sql_alchemy_conn = sqlite:///$(pwd)/airflow/airflow.db
-
-[webserver]
-base_url = http://localhost:8080
-web_server_port = 8080
-
-[scheduler]
-scheduler_heartbeat_sec = 5
-EOL
-
-airflow db migrate
-
-airflow users create \
-    --username admin \
-    --firstname Admin \
-    --lastname User \
-    --role Admin \
-    --email admin@example.com \
-    --password admin
-
-echo "✅ Setup complete!"
-echo ""
-echo "📝 Installed Versions:"
-python --version
-uv --version
-R --version | head -n 1
-julia --version
-echo "Airflow $(airflow version)"
-echo ""
-echo "🚀 Next steps:"
-echo "1. Start Airflow: export AIRFLOW_HOME=\$(pwd)/airflow && airflow standalone"
-echo "2. Access UI at http://localhost:8080 (admin/admin)"
-echo "3. Begin building your pipeline scripts!"
+echo "✅ All dev tools, languages, and Jupyter kernels installed."
