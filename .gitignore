@@ -1,4 +1,9 @@
-# ===== AIRFLOW =====
+# ===== AIRFLOW (ignore all runtime/generated Airflow files except version-controlled DAGs) =====
+airflow/
+!airflow/dags/
+!airflow/dags/**  # (un-ignore all files and subfolders for DAGs)
+!airflow/airflow.cfg.example # (optional: if you ever have a distributed example config)
+
 airflow/airflow.db
 airflow/airflow.db-shm
 airflow/airflow.db-wal
@@ -8,12 +13,14 @@ airflow/*.pid
 airflow/*.err
 airflow/*.log
 
-# ===== DATA =====
+# ===== DATA (ignore generated and test data, not source datasets/scripts) =====
 data/*.db
 data/*.db-journal
 data/*.db-shm
 data/*.db-wal
 data/*.csv
+data/*.json
+data/*.xlsx
 
 # ===== R =====
 .Rhistory
@@ -40,16 +47,25 @@ dist/
 build/
 
 # ===== OUTPUTS =====
+outputs/
+outputs/plots/
 outputs/plots/*.png
 outputs/plots/*.pdf
+outputs/reports/
 outputs/reports/*.txt
 outputs/reports/*.csv
+
+# ===== JUPYTER NOTEBOOKS (output artifacts, not .ipynb code) =====
+.ipynb_checkpoints/
+*.nb.html
+*.nbconvert.ipynb
+*.out.ipynb
 
 # ===== LOGS =====
 logs/
 *.log
 
-# ===== IDE =====
+# ===== IDE/EDITOR FILES =====
 .vscode/
 .idea/
 *.swp
