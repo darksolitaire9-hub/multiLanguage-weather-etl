@@ -14,23 +14,27 @@ This project is a living experiment in **AI-empowered learning and hands-on tech
 From design choices to debugging, AI acted as:
 - Mentor and rapid explainer of confusing docs, CLI errors, and best practices.
 - Brainstorming/solution partner—suggesting alternatives and catching hidden issues.
-- Pro tip dispenser: Everything from uv instead of pip, to extension, to shell strictness.
+- Pro tip dispenser: Everything from shell strictness to extensions.
 - Reliable—once I checked (and validated) assumptions with real commands!
+- *Note*: The switch to [uv](https://github.com/astral-sh/uv) for Python package management was a personal decision, not AI-recommended.
 
-**Every config and fix here is both tried and AI-reviewed.**
+**Every config and fix here is both tried and AI-reviewed (unless otherwise noted as my own experiment).**
 
 ---
 
 ## 🛠️ What the Devcontainer Now Delivers
 
 - **Stable Ubuntu 22.04 base image** (proven, not “assumed”… see Issues below)
-- **Python 3 managed by [uv](https://github.com/astral-sh/uv)** (pip removed after install)
+- **Python 3 managed by [uv](https://github.com/astral-sh/uv)** (pip removed after install; uv was my personal choice for speed/reproducibility)
 - **R and Julia** full installs (robust, for Jupyter and scripts)
 - **Apache Airflow** in persistent virtualenv with global CLI symlink
 - **Jupyter kernels** for Python, R, and Julia (all auto-detected in VS Code)
 - **Git, build-essential, curl, wget, etc** fully pre-installed
+- **ffmpeg installed and reproducible:** Command-line media toolkit now built in for ETL, video/audio/image preprocessing, and data pipeline demos—install verified and logged.
+- **GitHub CLI (`gh`) for modern repo/workflow management:** Added for instant GitHub ops (PRs, issues, discussions) directly from Codespaces or terminal.
 - **VS Code extensions** for Python, R, Julia, Jupyter, and GitHub/PR flow
 - **Aggressive scripting:** strict mode, error on fail, apt cache cleanups, version verifications
+- **Improved `.gitignore` for collaboration/clean repo:** Now ignores Airflow runtime, database files, ETL outputs, media artifacts (mp4, mp3, jpg, etc), Jupyter/R/Julia/Python build files, and temp/editor logs—ensures only clean, minimal, reproducible source and essential config is tracked.
 
 ---
 
@@ -86,7 +90,7 @@ Open issues or add clarifying PRs if you find an edge case I missed!**
 
 ### 1. **Wrong Base OS: Alpine vs. Ubuntu**
 - **Issue:** Codespaces often launched on Alpine Linux despite `ubuntu:22.04` config, causing failures for most installs, unexpected CLI behavior, and broken VS Code tooling.
-- **Resolution:**  
+- **Resolution:**  
     - *Simple check was key*: Ran `cat /etc/os-release` in the CLI and instantly revealed "Alpine" (not Ubuntu).
     - Updated `.devcontainer/devcontainer.json` to ensure `"image": "ubuntu:22.04"`.
     - Only then did further config and package installs work reliably.
@@ -94,25 +98,25 @@ Open issues or add clarifying PRs if you find an edge case I missed!**
 
 ### 2. **Missing Developer Tools**
 - **Issue:** Alpine and minimal Ubuntu images often lacked `git`, `build-essential` and other baseline dev requirements.
-- **Resolution:**  
-    - Script now explicitly installs `git`, `build-essential`, and companions before anything else.  
+- **Resolution:**  
+    - Script now explicitly installs `git`, `build-essential`, and companions before anything else.  
     - Makes scripts and extensions run on first build.
 
 ### 3. **Python Package Management**
 - **Issue:** Pip kept failing installs, virtual environments didn’t activate reliably, and dependency management was slow.
-- **Resolution:**  
-    - AI recommended switching to [uv](https://github.com/astral-sh/uv) for fast, clean Python package management.
+- **Resolution:**  
+    - Switched to [uv](https://github.com/astral-sh/uv) for fast, clean Python package management—a personal choice after comparing options and learning about its speed and reproducibility benefits.
     - Removed pip after installing uv to avoid cross-talk/confusion.
 
 ### 4. **Airflow CLI Not Found**
 - **Issue:** Installing Airflow via uv/pip as user-only meant no `airflow` command in shell or scripts.
-- **Resolution:**  
+- **Resolution:**  
     - Installed Airflow in a dedicated venv (`/opt/airflow-venv`), then symlinked the CLI to `/usr/local/bin` for global access.
 
 ### 5. **VS Code Source Control/Extensions Not Auto-Syncing with CLI**
 - **Issue:** After installing new CLI tools (like git), or changing user identity, VS Code extensions often didn’t "see" those changes right away.
-- **Resolution:**  
-    - **Reload the VS Code window:**  
+- **Resolution:**  
+    - **Reload the VS Code window:**  
         - Keyboard: `Ctrl+Shift+P`, then type/select “Reload Window”.
         - Or, refresh browser tab in Codespaces web.
     - Once reloaded, extensions and Source Control sidebar work as expected and detect all CLI/config changes.
@@ -120,7 +124,7 @@ Open issues or add clarifying PRs if you find an edge case I missed!**
 
 ### 6. **Git Commit Identity/Repo Auth**
 - **Issue:** Commits would sometimes fail with “unknown author identity” or push would require GitHub login.
-- **Resolution:**  
+- **Resolution:**  
     - Set your global username/email using:
         ```
         git config --global user.name "darksolitaire9"
@@ -143,23 +147,47 @@ Open issues or add clarifying PRs if you find an edge case I missed!**
     ```
 - **Check toolchain versions** after rebuild:
     ```
-    python --version && uv --version && R --version && julia --version && airflow version && git --version
+    python --version && uv --version && R --version && julia --version && airflow version && git --version && ffmpeg -version && gh --version
     ```
-- **After CLI or config changes:**  
+- **After CLI or config changes:**  
     Reload VS Code (`Ctrl+Shift+P` → “Reload Window”) to fix any Source Control/UI sync problems.
 - **Set Git identity** before first commit—keeps history clean (see above).
 - **Document every new issue and solution in this README**—future you will thank present you!
+- **Switch from pip to uv was my own research/experiment, not an AI suggestion.**
+
+- **.gitignore ensures reproducibility and clean repo:**  
+    Ignores Airflow runtime, database files, ETL outputs, media artifacts (mp4, mp3, jpg, etc), Jupyter/R/Julia/Python build files, and temp/editor logs. Only source code, essential configs, and versioned DAGs are tracked.
 
 ---
 
 ## 🚦 The Ongoing Experiment
 
-This repo is more than just running code—it’s a documentation and learning experiment guided by curiosity, iteration, and AI support.  
+This repo is more than just running code—it’s a documentation and learning experiment guided by curiosity, iteration, and AI support.  
 As more data pipelines, bugs, or workflow improvements show up, you’ll find the journey, solutions, and libraries described here.
 
 **If you want to learn, contribute, or just follow along—fork, PR, or just read and remix these lessons!**
 
 ---
 
-_Created and updated as a log of curiosity-driven, AI-assisted discovery.  
+_Created and updated as a log of curiosity-driven, AI-assisted discovery.  
 This file will grow with every milestone, bug, and breakthrough._
+
+---
+
+## 🗓️ [2025-10-29] Update: ffmpeg, GitHub CLI, and .gitignore Improvements
+
+**What changed today:**
+- **ffmpeg** is now reproducibly installed in the devcontainer for programmatic media, audio, image, and ETL pipeline tasks.
+- **GitHub CLI (`gh`)** is installed for seamless repo management directly in the terminal/Codespace.
+- **.gitignore expanded:** Now robustly ignores Airflow dbs, logs, outputs, ETL and media artifacts, temp/editor system files, and all common multi-language project build/test artifacts.
+- **Full rebuild tested:** All installs, verification steps, and CLI tools confirmed working after container rebuild.
+- **Documentation/logging best practice:** This dated entry records the milestone and rationale for reproducibility and streamlined collaboration.
+
+**Verification performed:**
+- ffmpeg -version
+- gh --version
+- ffmpeg -f lavfi -i testsrc=duration=1:size=320x240:rate=30 test_ffmpeg.mp4
+- ls -lh test_ffmpeg.mp4
+
+
+*Note: The switch to uv for Python was my choice, not AI-suggested!*

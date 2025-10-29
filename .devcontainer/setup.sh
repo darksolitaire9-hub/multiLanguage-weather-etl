@@ -8,6 +8,19 @@ apt-get install -y git curl wget ca-certificates build-essential software-proper
     locales libssl-dev libcurl4-openssl-dev libxml2-dev \
     libsqlite3-dev sqlite3 bzip2 unzip
 
+# ---- Add ffmpeg (media processing tools) ----
+apt-get install -y ffmpeg
+
+# ---- GitHub CLI (gh) install ----
+type -p curl >/dev/null || apt-get install -y curl
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+  dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+  chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
+  tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+  apt-get update && \
+  apt-get install -y gh
+
 # ---- Python (python3, venv, uv only—no pip after install) ----
 apt-get install -y python3 python3-venv python3-pip
 update-alternatives --install /usr/bin/python python /usr/bin/python3 1
