@@ -191,3 +191,61 @@ This file will grow with every milestone, bug, and breakthrough._
 
 
 *Note: The switch to uv for Python was my choice, not AI-suggested!*
+
+## 🚀 [2025-10-30] Update: Python Dependency Flow, uv, and Geocode Utility
+
+**Today's Milestone:**  
+- Setup and standardized Python dependency management using **uv** with a clean `pyproject.toml` (**no more pip!**)
+- Added and tested the first pipeline helper:  
+  `airflow/helpers/geocode_utils.py` — fetches city coordinates via Open-Meteo’s geocoding API (no API keys required)
+- Improved reproducibility and cross-shell dev experience (especially for Codespaces users)
+
+---
+
+**How it works:**
+- **Dependencies are declared and versioned** in `pyproject.toml` at the project root (currently: `requests`)
+- **Project venv managed with uv:**  
+```
+
+uv venv .venv
+source .venv/bin/activate
+uv pip install .
+
+```
+- **No more guessing/side installs:**  
+Install all needed packages reliably with a single command; developers just follow the README/setup
+- `.devcontainer/setup.sh` and devcontainer `postCreateCommand` can automate setup for newcomers/rebuilds
+
+**What you can do now:**
+- Write, run, and extend helpers/pipeline code without worrying about global vs project-specific Python
+- Use the same workflow in both local dev, Codespaces, and containerized environments
+
+**Example Usage:**  
+```
+
+from airflow.helpers.geocode_utils import get_city_coordinates
+lat, lon = get_city_coordinates("Lisbon", country="PT")
+print(lat, lon)  \# e.g., 38.7071, -9.1355
+
+```
+
+**Commit Workflow:**  
+- Add/modify dependencies in `pyproject.toml`
+- Commit changes first  
+```
+
+git add pyproject.toml
+git commit -m "update dependencies"
+
+```
+- Install using `uv pip install .` after pulling/merging changes
+
+**Current Maintainer:**  
+- darksolitaire9+etl@gmail.com
+
+---
+
+**Summary:**  
+All contributors and future setups benefit from a **proven, versioned, and reproducible Python environment**, centered on uv—no more “works on my machine”!  
+The geocoding utility is the first step in your historical/forecast weather ETL pipeline.  
+Commit, pull, and build with confidence.
