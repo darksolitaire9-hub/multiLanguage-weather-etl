@@ -4,6 +4,7 @@ def get_city_coordinates(city_name, country=None):
     """
     Returns (latitude, longitude) for city_name using Open-Meteo's geocoding API.
     If country is supplied, narrows the search.
+    Raises ValueError if no result found.
     """
     url = "https://geocoding-api.open-meteo.com/v1/search"
     params = {'name': city_name, 'count': 1}
@@ -11,7 +12,12 @@ def get_city_coordinates(city_name, country=None):
         params['country'] = country
     response = requests.get(url, params=params, timeout=10)
     data = response.json()
-    print(data)
-    # result = data['results'][0]
-    # return result['latitude'], result['longitude']
-
+    results = data.get('results', [])
+    if results:
+        latitude = results[0]['latitude']
+        longitude = results[0]['longitude']
+        return latitude, longitude
+    else:
+        raise ValueError(
+            f"No results found for city '{city_name}' with country '{country}'. API response: {data}"
+        )
