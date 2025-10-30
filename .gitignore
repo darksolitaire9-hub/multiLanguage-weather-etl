@@ -2,6 +2,10 @@
 airflow/
 !airflow/dags/
 !airflow/dags/**  # (un-ignore all files and subfolders for DAGs)
+!airflow/config/
+!airflow/config/**
+!airflow/helpers/
+!airflow/helpers/**
 !airflow/airflow.cfg.example # (optional: if you ever have a distributed example config)
 
 airflow/airflow.db
