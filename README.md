@@ -249,3 +249,55 @@ git commit -m "update dependencies"
 All contributors and future setups benefit from a **proven, versioned, and reproducible Python environment**, centered on uv—no more “works on my machine”!  
 The geocoding utility is the first step in your historical/forecast weather ETL pipeline.  
 Commit, pull, and build with confidence.
+
+
+**Today's Milestone:**  
+- Expanded pipeline helpers with robust API calls:
+  - `geocode_utils.py`: Fetches latitude/longitude for any city via Open-Meteo's geocoding API. Now fully driven by config constants (`CITY_NAME`, `COUNTRY`), with clear error handling.
+  - `weather_api.py`: Added to handle weather data API calls—retrieves weather info by coordinates for any date range.
+- Centralized configuration:
+  - Config file (`constants.py`) now holds all key parameters: city, country, start/end years, and base geocoding API URL.
+  - Seamless updates for targets—just change config, no code edits needed.
+
+---
+
+**How the flow works:**  
+- Set all parameters for extraction in `config/constants.py`:
+```
+
+CITY_NAME = "Lisbon"
+COUNTRY = "PT"
+START_YEAR = 2015
+END_YEAR = 2025
+BASE_URL = "https://geocoding-api.open-meteo.com/v1/search"
+
+```
+- Get coordinates via the helper:
+```
+
+from airflow.helpers.geocode_utils import get_city_coordinates
+lat, lon = get_city_coordinates(CITY_NAME, COUNTRY)
+
+```
+- Use those for weather API extraction:
+```
+
+from airflow.helpers.weather_api import fetch_weather_json
+for year in range(START_YEAR, END_YEAR + 1):
+start, end = f"{year}-01-01", f"{year}-12-31"
+data = fetch_weather_json(lat, lon, start, end)
+\# process/save as needed
+
+```
+- All helpers use imported constants, no hardcoding—making pipelines reproducible and modular.
+
+**Best Practices Applied:**  
+- Atomic, descriptive git commits for grouped logic (constants, helpers, new files).
+- Helpers are generic and reusable; configs are pure constants.
+- Project layout keeps logic, config, and workflow clearly separated.
+
+**Summary:**  
+Project now supports parameter-driven geocoding and weather data ETL via open APIs—fully reproducible and ready for scalable automation. Just update config for instant new extractions!
+
+_commit timestamp: 2025-10-30 16:34 WET_
+```
