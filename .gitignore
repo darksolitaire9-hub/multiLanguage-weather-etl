@@ -1,21 +1,13 @@
 # ===== AIRFLOW (ignore all runtime/generated Airflow files except version-controlled DAGs) =====
-airflow/
+airflow/*
 !airflow/dags/
-!airflow/dags/**  # (un-ignore all files and subfolders for DAGs)
+!airflow/dags/**
 !airflow/config/
 !airflow/config/**
 !airflow/helpers/
 !airflow/helpers/**
-!airflow/airflow.cfg.example # (optional: if you ever have a distributed example config)
+!airflow/airflow.cfg.example
 
-airflow/airflow.db
-airflow/airflow.db-shm
-airflow/airflow.db-wal
-airflow/logs/
-airflow/webserver_config.py
-airflow/*.pid
-airflow/*.err
-airflow/*.log
 
 # ===== DATA (ignore generated and test data, not source datasets/scripts) =====
 data/*.db
