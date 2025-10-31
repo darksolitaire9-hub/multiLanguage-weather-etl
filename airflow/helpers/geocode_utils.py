@@ -1,5 +1,5 @@
 import requests
-from config.constants import BASE_URL
+from config.constants import GEOCODING_API_URL
 
 def get_city_coordinates(city_name, country=None):
     """
@@ -7,7 +7,7 @@ def get_city_coordinates(city_name, country=None):
     If country is supplied, narrows the search.
     Raises ValueError if no result found.
     """
-    url = BASE_URL
+    url = GEOCODING_API_URL
     params = {'name': city_name, 'count': 1}
     if country:
         params['country'] = country
