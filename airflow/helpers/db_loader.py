@@ -37,8 +37,9 @@
 #   - requests (for script-mode API fetch)
 # =====================================================
 
-# ---- [The rest of your code as provided earlier] ----
+# ---- [End] ----
 import sqlite3
+import os
 
 def insert_weather_data(db_path, weather_data):
     """
@@ -64,6 +65,7 @@ def insert_weather_data(db_path, weather_data):
     Returns:
         None
     """
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     daily = weather_data.get('daily', {})
     # Prepare records as tuples for insertion
     records = list(zip(
@@ -86,3 +88,35 @@ def insert_weather_data(db_path, weather_data):
     conn.commit()
     conn.close()
     print(f"Inserted up to {len(records)} days into {db_path} (duplicates ignored)")
+
+
+if __name__ == "__main__":
+    from config.constants import DB_PATH, CITY_NAME, COUNTRY, WEATHER_API_URL, DAILY_VARIABLES, START_YEAR, TIMEZONE, NUM_YEARS, DIRECTION
+    from helpers.geocode_utils import get_city_coordinates
+    from helpers.date_utils import get_interval_start_to_end_dates
+    from helpers.db_utils import create_weather_table
+    import requests
+
+    # Ensure the database and table exist before loading
+    create_weather_table(DB_PATH)
+
+    # Prepare date range for the test fetch (using config)
+    start_date, end_date = get_interval_start_to_end_dates(START_YEAR, NUM_YEARS, DIRECTION)
+
+    # Fetch weather data for the configured city/country
+    lat, lon = get_city_coordinates(CITY_NAME, COUNTRY)
+    params = {
+        'latitude': lat,
+        'longitude': lon,
+        'start_date': start_date,
+        'end_date': end_date,
+        'daily': ','.join(DAILY_VARIABLES),
+        'timezone': TIMEZONE,
+    }
+    print("Fetching weather data...")
+    response = requests.get(WEATHER_API_URL, params=params, timeout=60)
+    weather_data = response.json()
+
+    # Test the insert_weather_data function
+    print("Loading weather data into database...")
+    insert_weather_data(DB_PATH, weather_data)
