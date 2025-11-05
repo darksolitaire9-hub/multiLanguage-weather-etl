@@ -9,11 +9,26 @@
 # weather data (daily summary) fetched from the Open-Meteo
 # Weather API into the local project SQLite database.
 #
+# Design Decision – Duplicates and Idempotency:
+# -----------------------------------------------------
+# For this pipeline, we enforce a UNIQUE constraint on the `date`
+# column in the target DB and use the `INSERT OR IGNORE` statement.
+#
+# This approach ensures that:
+#   - Each day is loaded only once, even if the ETL is rerun or the API is called multiple times.
+#   - If an attempt is made to insert data for a date that already exists, the insert is ignored.
+#   - We avoid possible corruption or loss of historical data by never overwriting existing records without explicit intent.
+#
+# Rationale:
+#   - Weather API data for historic periods is generally stable and should not be retroactively updated.
+#   - Safety: Rerunning the pipeline (e.g., after interruptions or updates) will not produce duplicates or overwrite prior results.
+#   - Professional data workflows prioritize data integrity and idempotency unless routine corrections are required (in which case, "REPLACE" logic would be used).
+#
 # Usage:
 #   from helpers.db_loader import insert_weather_data
 #   insert_weather_data(DB_PATH, weather_data)
 #
-#   For standalone testing, run this module directly:
+# Standalone test:
 #   python helpers/db_loader.py
 #
 # Dependencies:
@@ -22,6 +37,7 @@
 #   - requests (for script-mode API fetch)
 # =====================================================
 
+# ---- [The rest of your code as provided earlier] ----
 import sqlite3
 
 def insert_weather_data(db_path, weather_data):
@@ -42,7 +58,8 @@ def insert_weather_data(db_path, weather_data):
             }
     Side Effects:
         Inserts each day's observations as a new record in 'weather_daily'.
-        Prints count of loaded records.
+        If a date already exists (unique), record is ignored.
+        Prints count of attempted loads.
 
     Returns:
         None
@@ -63,10 +80,9 @@ def insert_weather_data(db_path, weather_data):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.executemany("""
-        INSERT INTO weather_daily (date, temp_max, temp_min, weather_code)
+        INSERT OR IGNORE INTO weather_daily (date, temp_max, temp_min, weather_code)
         VALUES (?, ?, ?, ?)
     """, records)
     conn.commit()
     conn.close()
-    print(f"Inserted {len(records)} days into {db_path}")
-
+    print(f"Inserted up to {len(records)} days into {db_path} (duplicates ignored)")
