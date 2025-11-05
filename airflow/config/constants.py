@@ -1,32 +1,37 @@
 # airflow/config/constants.py
-CITY_NAME = "Lisbon"
-COUNTRY = "PT"
-START_YEAR = 2015
+# ===========================================
+# Central project configuration and constants.
+# Edit these to change run behavior, API targets, 
+# time ranges, and output locations project-wide.
+# ===========================================
 
+# --- Location settings ---
+CITY_NAME = "Lisbon"         # Main city for weather data extraction
+COUNTRY = "PT"               # Country code (ISO Alpha-2 format)
+TIMEZONE = "Europe/Lisbon"   # Target timezone for API queries
 
-TIMEZONE = "Europe/Lisbon"
+# --- API endpoints ----
+GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search"   # URL for geocoding requests (lat/lon)
+WEATHER_API_URL = "https://archive-api.open-meteo.com/v1/archive"      # Weather API endpoint for historical data
 
-GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search"
-WEATHER_API_URL = "https://archive-api.open-meteo.com/v1/archive"
+# --- SQLite database location ---
+DB_PATH = "data/weather.db"  # Physical location of your weather.db
 
-# Minimal set of daily weather variables for summary reporting.
-# Open-Meteo provides temperature in degrees Celsius (°C) by default.
-# See: https://open-meteo.com/en/docs for data format and measurement details.
-
-
+# --- Weather data configuration ---
 DAILY_VARIABLES = [
-    "temperature_2m_max",  # Max air temp for the day (°C), measured at 2 meters above ground.
-    "temperature_2m_min",  # Min air temp for the day (°C), measured at 2 meters above ground.
-    "weather_code",        # WMO code for main weather type that day.
+    "temperature_2m_max",  # Max air temp for the day (°C), measured at 2 meters above ground
+    "temperature_2m_min",  # Min air temp for the day (°C), measured at 2 meters above ground
+    "weather_code",        # WMO code for main daily weather type
 ]
 
+# --- Year range and fetch direction ---
+FORWARD = "forward"         # Fetch data starting from START_YEAR
+BACKWARD = "backward"       # Fetch data going backward from START_YEAR
+DIRECTION = FORWARD         # Choose direction (FORWARD/BACKWARD) for current execution
 
+START_YEAR = 2015           # Anchor year (starting point for data retrieval)
+NUM_YEARS = 5               # Number of years to include (from anchor)
 
-# === Year Range & Fetch Direction Configuration ===
-
-FORWARD = "forward"
-BACKWARD = "backward"
-DIRECTION = FORWARD   # Set to FORWARD or BACKWARD as needed
-
-START_YEAR = 2015     # Anchor year (first if forward, last if backward)
-NUM_YEARS = 5         # How many years to fetch, including anchor
+# ------------------------------------------
+# End of configuration
+# ------------------------------------------
