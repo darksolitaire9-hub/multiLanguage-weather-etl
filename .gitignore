@@ -17,7 +17,7 @@ data/*.db-wal
 data/*.csv
 data/*.json
 data/*.xlsx
-
+/data
 # ===== R =====
 .Rhistory
 .RData
