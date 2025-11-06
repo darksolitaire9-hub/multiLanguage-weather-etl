@@ -1,6 +1,5 @@
-# helpers/db_utils.py
-
 import sqlite3
+import os
 
 def create_weather_table(db_path):
     """
@@ -8,6 +7,8 @@ def create_weather_table(db_path):
     - db_path: str, path to the .db SQLite file (will be created if not exists).
     The operation is idempotent (safe to run multiple times).
     """
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("""
@@ -21,5 +22,3 @@ def create_weather_table(db_path):
     """)
     conn.commit()
     conn.close()
-    
-
