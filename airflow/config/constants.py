@@ -18,7 +18,7 @@ WEATHER_API_URL = "https://archive-api.open-meteo.com/v1/archive"      # Weather
 DB_PATH = "data/weather.db"
 TABLE_NAME = "weather_daily"
 EXPORT_QUERY = f"SELECT * FROM {TABLE_NAME}"
-EXPORT_CSV = "weather_export_test.csv"
+EXPORT_CSV_DIR = "data/exported_csvs"
 
 
 # --- Weather data configuration ---
