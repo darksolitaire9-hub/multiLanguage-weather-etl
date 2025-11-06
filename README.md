@@ -301,3 +301,35 @@ Project now supports parameter-driven geocoding and weather data ETL via open AP
 
 _commit timestamp: 2025-10-30 16:34 WET_
 ```
+
+---
+
+## ⏩ ETL Pipeline Progress (As of 2025-11-06)
+
+**Current workflow covers:**
+
+1. **Extract:**  
+    - Fetches city coordinates from the geocoding API (`get_city_coordinates`)
+    - Uses those coordinates to query daily historical weather data from the weather API
+
+2. **Transform:**  
+    - Structures raw API JSON into normalized Python objects and lists
+    - Each weather record is mapped to a date and defined variables
+
+3. **Load:**  
+    - Inserts all normalized weather data into the local SQLite table (`weather_daily`)
+    - Ensures unique records by date for full idempotency—safe to rerun any time
+    - Exports the resulting table to CSV using Polars (chosen over pandas for speed, context manager support, and modern API)
+
+---
+
+**What’s working right now:**
+
+- All helpers use project config constants—no hardcoded paths, locations, or date ranges
+- ETL jobs can be run standalone in any devcontainer/Codespace; always reproducible
+- Directory creation and CSV outputs are robust (skipped if file exists and non-empty)
+- Network errors and API failures are logged with clear messages; pipeline never silently fails or crashes on bad responses
+- Pipeline is modular: each step (extract, transform, load/export) easily testable, replaceable, and designed for future automation/extension
+
+---
+
