@@ -14,8 +14,12 @@ TIMEZONE = "Europe/Lisbon"   # Target timezone for API queries
 GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search"   # URL for geocoding requests (lat/lon)
 WEATHER_API_URL = "https://archive-api.open-meteo.com/v1/archive"      # Weather API endpoint for historical data
 
-# --- SQLite database location ---
-DB_PATH = "data/weather.db"  # Physical location of your weather.db
+# --- SQLite and Export Config ---
+DB_PATH = "data/weather.db"
+TABLE_NAME = "weather_daily"
+EXPORT_QUERY = f"SELECT * FROM {TABLE_NAME}"
+EXPORT_CSV = "weather_export_test.csv"
+
 
 # --- Weather data configuration ---
 DAILY_VARIABLES = [
