@@ -19,6 +19,8 @@ DB_PATH = "data/weather.db"
 TABLE_NAME = "weather_daily"
 EXPORT_QUERY = f"SELECT * FROM {TABLE_NAME}"
 EXPORT_CSV_DIR = "data/exported_csvs"
+EXPORT_CSV_FILENAME = "weather_export_test.csv"
+EXPORT_CSV = f"{EXPORT_CSV_DIR}/{EXPORT_CSV_FILENAME}"
 
 
 # --- Weather data configuration ---
