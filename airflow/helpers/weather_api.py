@@ -20,6 +20,11 @@ def fetch_weather_data(
         'daily': ','.join(daily_variables),
         'timezone': timezone,
     }
-    response = requests.get(weather_api_url, params=params, timeout=60)
-    data = response.json()
-    return data
+    try:
+        response = requests.get(weather_api_url, params=params, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        return data
+    except Exception as e:
+        print(f"Error fetching weather API: {e}")
+        return {}
