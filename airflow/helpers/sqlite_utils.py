@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import polars as pl
+from helpers.csv_path_writer import save_exported_csv_path_if_missing
 from config.constants import DB_PATH, EXPORT_QUERY, EXPORT_CSV
 
 def export_sqlite_to_csv_with_polars(
@@ -27,7 +28,11 @@ def export_sqlite_to_csv_with_polars(
         print("Sample of exported data:")
         print(df.head(sample_lines))  # Only uses Polars, no pandas
         print("=" * 45)
+
+        # Safely save export path only if record file does not exist yet
+        save_exported_csv_path_if_missing("airflow/config/export_csv_path.txt", output_csv)
         return True
+        
     except Exception as e:
         print(f"❌ Error during export: {e}")
         return False

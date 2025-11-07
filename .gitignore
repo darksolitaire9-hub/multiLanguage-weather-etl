@@ -17,6 +17,7 @@ data/*.db-wal
 data/*.csv
 data/*.json
 data/*.xlsx
+data/*.txt
 /data
 # ===== R =====
 .Rhistory
