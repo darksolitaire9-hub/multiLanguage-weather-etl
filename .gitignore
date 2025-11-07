@@ -1,5 +1,6 @@
 # ===== AIRFLOW (ignore all runtime/generated Airflow files except version-controlled DAGs) =====
 airflow/*
+airflow/config/*.txt
 !airflow/dags/
 !airflow/dags/**
 !airflow/config/
