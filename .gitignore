@@ -1,6 +1,5 @@
 # ===== AIRFLOW (ignore all runtime/generated Airflow files except version-controlled DAGs) =====
 airflow/*
-airflow/config/*.txt
 !airflow/dags/
 !airflow/dags/**
 !airflow/config/
@@ -8,6 +7,8 @@ airflow/config/*.txt
 !airflow/helpers/
 !airflow/helpers/**
 !airflow/airflow.cfg.example
+
+airflow/config/export_csv_path.txt
 
 
 # ===== DATA (ignore generated and test data, not source datasets/scripts) =====
