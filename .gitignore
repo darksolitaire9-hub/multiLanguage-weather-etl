@@ -9,6 +9,9 @@ airflow/*
 !airflow/airflow.cfg.example
 
 airflow/config/export_csv_path.txt
+!airflow/helpers_jl/
+!airflow/helpers_jl/**
+
 
 
 # ===== DATA (ignore generated and test data, not source datasets/scripts) =====
