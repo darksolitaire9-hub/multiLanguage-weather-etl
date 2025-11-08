@@ -302,7 +302,7 @@ Project now supports parameter-driven geocoding and weather data ETL via open AP
 _commit timestamp: 2025-10-30 16:34 WET_
 ```
 
----
+
 
 ## ⏩ ETL Pipeline Progress (As of 2025-11-06)
 
@@ -331,5 +331,78 @@ _commit timestamp: 2025-10-30 16:34 WET_
 - Network errors and API failures are logged with clear messages; pipeline never silently fails or crashes on bad responses
 - Pipeline is modular: each step (extract, transform, load/export) easily testable, replaceable, and designed for future automation/extension
 
+
+
+# ✨ Daily Refactor & Language Insights — 2025-11-08
+
+## 🚀 What We Did Today
+
+- **Refactored Julia Config Utilities**
+    - Standardized on `LOCATION_TO_CONFIG` as the source of truth for config pathing.
+    - Removed the redundant `config_dir_exists`—now we use Julia’s `isdir()` directly for directory checks.
+    - Improved function signatures and documentation for clarity.
+
+<br/>
+
+- **Final Julia Script (Core Logic):**
+    ```
+    include("../config/constants.jl")
+    using .Constants
+
+    """
+        first_txt_file(config_dir::AbstractString=Constants.LOCATION_TO_CONFIG) -> Union{String, Nothing}
+        Finds all `.txt` files in the provided configuration directory, or returns nothing.
+    """
+    function first_txt_file(config_dir::AbstractString=Constants.LOCATION_TO_CONFIG)
+        if !isdir(config_dir)
+            return nothing
+        end
+        files = readdir(config_dir)
+        txt_files = filter(f -> endswith(f, ".txt"), files)
+        return isempty(txt_files) ? nothing : txt_files
+    end
+
+    println("Testing config directory utilities on: ", LOCATION_TO_CONFIG)
+    txt_files = first_txt_file()
+
+    if txt_files !== nothing
+        println("Found TXT file(s): ", txt_files)
+    elseif isdir(LOCATION_TO_CONFIG)
+        println("No TXT files found in config directory.")
+    else
+        println("Config directory does not exist at: ", LOCATION_TO_CONFIG)
+    end
+    ```
+
+<br/>
+
+- **Discussed Professional Script Patterns:**
+    - **Julia:** Professional projects often use a `main()` function plus a guarded entry point (`if abspath(PROGRAM_FILE) == @__FILE__`).
+    - **Python:** Uses `if __name__ == "__main__":` convention.
+    - **R:** Most scripts run top-to-bottom, but you can optionally use a `main()` function at the end.
+
+- **Best Practices for ETL Pipelines:**  
+    - Structure using a main function and an entry-point guard for clarity and maintainability in Julia and Python.
+
+- **Coding Principle:**  
+    - Avoid redundant wrappers; use built-in library functions directly unless custom behavior is truly needed.
+
 ---
+
+## 🌍 Language Differences Discovered
+
+| Language | Indexing | Entry Point Pattern             | Script-style Supported |
+|----------|----------|---------------------------------|-----------------------|
+| Julia    | 1-based  | `main()` + entry guard          | Yes                   |
+| Python   | 0-based  | `main()` + `__main__` guard     | Yes                   |
+| R        | 1-based  | main function (optional)        | Yes                   |
+
+- **R:** Scripts execute all lines by default unless structured with a main function.
+- **Julia & Python:** Support robust entry guards, enabling clean modular code and reusability.
+
+---
+
+_Coded, reviewed, and summarized on **2025-11-08**._
+
+
 
