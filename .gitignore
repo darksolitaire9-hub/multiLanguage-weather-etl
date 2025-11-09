@@ -10,9 +10,9 @@ airflow/*
 
 airflow/config/export_csv_path.txt
 !airflow/helpers_jl/
-!airflow/helpers_jl/**
+!airflow/helpers_jl/**.jl
 !airflow/analysis_jl/
-!airflow/analysis_jl/**
+!airflow/analysis_jl/
 
 
 

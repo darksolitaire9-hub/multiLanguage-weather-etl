@@ -405,4 +405,42 @@ _commit timestamp: 2025-10-30 16:34 WET_
 _Coded, reviewed, and summarized on **2025-11-08**._
 
 
+## 📆 Project Observations — November 9, 2025
+
+### 🛡️ Defensive Programming: What We Learned
+
+A major focus in our workflow has been **defensive programming**: designing code that anticipates missing files, absent directories, or irregular data—so the pipeline continues robustly even when things go wrong.
+
+- **Every helper module checks for existence before processing files.**
+- **Functions return `nothing` or clear messages on missing resources.**
+- **The pipeline never crashes due to unexpected file system states; instead, steps are skipped or handled gracefully.**
+
+This approach protects our ETL from real-world uncertainties—becoming essential for reliability in data engineering and automated workflows.
+
+---
+
+### 🚀 Why `--project=.` Is Critical in Julia Projects
+
+Julia projects use a dedicated local environment (defined by `Project.toml` and `Manifest.toml` at your root) for package management and reproducibility.
+
+**Running scripts directly (e.g., `julia script.jl`) uses the global Julia environment, which may lack required packages or the correct versions.**
+
+#### Best Practice
+
+Always run scripts with:
+
+
+- `--project=.` ensures the script uses your project’s local environment.
+- This guarantees package availability, reproducibility, and prevents hidden version conflicts.
+
+#### What We Learned
+
+Using `--project=.` for every script—from main analyses to helpers—keeps our workflow completely reproducible, robust, and collaboration-friendly.
+
+#### Example
+
+```
+julia --project=. airflow/helpers_jl/csv_from_txt_loader.jl
+```
+
 
