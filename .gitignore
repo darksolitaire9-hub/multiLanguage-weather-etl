@@ -38,6 +38,9 @@ data/*.txt
 *.jl.mem
 
 
+# manifest dir
+manifests/
+
 # ===== PYTHON =====
 __pycache__/
 *.py[cod]
