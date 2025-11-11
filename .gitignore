@@ -31,6 +31,8 @@ data/*.txt
 .RData
 .Rproj.user/
 *.Rproj
+!helpers_R/
+!helpers_R/**.R 
 
 # ===== JULIA =====
 *.jl.*.cov
