@@ -1,8 +1,8 @@
 import os
 import sqlite3
 import polars as pl
-from helpers.csv_path_writer import save_exported_csv_path_if_missing
-from config.constants import DB_PATH, EXPORT_QUERY, EXPORT_CSV
+from .csv_path_writer import save_exported_csv_path_if_missing
+from ..config.constants import DB_PATH, EXPORT_QUERY, EXPORT_CSV
 
 def export_sqlite_to_csv_with_polars(
     sqlite_db_path=DB_PATH,
@@ -38,15 +38,16 @@ def export_sqlite_to_csv_with_polars(
         return False
 
 if __name__ == "__main__":
-    from config.constants import DB_PATH
-    from helpers.db_utils import create_weather_table
-    from helpers.db_loader import insert_weather_data
-    from helpers.weather_api import fetch_weather_data
-    from helpers.date_utils import get_interval_start_to_end_dates
-    from config.constants import (
-        CITY_NAME, COUNTRY, WEATHER_API_URL,
-        START_YEAR, NUM_YEARS, DIRECTION, DAILY_VARIABLES
-    )
+    
+    from ..config.constants import DB_PATH
+    from .db_utils import create_weather_table
+    from .db_loader import insert_weather_data
+    from .weather_api import fetch_weather_data
+    from .date_utils import get_interval_start_to_end_dates
+    from ..config.constants import (
+    CITY_NAME, COUNTRY, WEATHER_API_URL,
+    START_YEAR, NUM_YEARS, DIRECTION, DAILY_VARIABLES
+)
 
     # 1. Ensure DB and table exist
     create_weather_table(DB_PATH)

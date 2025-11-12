@@ -1,5 +1,5 @@
 import datetime
-from config.constants import DIRECTION, START_YEAR, NUM_YEARS, FORWARD, BACKWARD
+from ..config.constants import DIRECTION, START_YEAR, NUM_YEARS, FORWARD, BACKWARD
 
 def get_interval_start_to_end_dates(start_year=START_YEAR, num_years=NUM_YEARS, direction=DIRECTION):
     """

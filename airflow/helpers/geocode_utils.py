@@ -1,5 +1,5 @@
 import requests
-from config.constants import GEOCODING_API_URL
+from ..config.constants import GEOCODING_API_URL
 
 def get_city_coordinates(city_name, country=None):
     """
