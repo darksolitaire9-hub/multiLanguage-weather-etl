@@ -2,13 +2,30 @@
 set -eu  # Exit on error, treat unset variables as error
 
 # ===== PROJECT AUTO-SETUP SCRIPT: FOR CODESPACE OR LOCAL DEV =====
-# This script creates a non-root user, sets Airflow and all paths to be local to your repo
+# This script sets up system dependencies for R, creates a non-root user, 
+# and prepares Airflow and project directory ownerships.
+# Run as root (the default in Codespaces at first).
 
 PROJECT_HOME="/workspaces/multiLanguage-weather-etl"
 AIRFLOW_HOME="$PROJECT_HOME/airflow"
 DAGS_HOME="$PROJECT_HOME/dags"
 USER_NAME="etluser"
 USER_HOME="/home/$USER_NAME"
+
+# ---- SYSTEM LIBRARIES FOR R ENVIRONMENT ----
+echo "Installing required system dependencies for R graphics and ETL packages..."
+apt-get update
+apt-get install -y \
+  gdal-bin \
+  libgdal-dev \
+  libfontconfig1-dev \
+  libfreetype6-dev \
+  pandoc \
+  libharfbuzz-dev \
+  libfribidi-dev
+echo "✅ R system libraries installed."
+
+# ---- PROJECT USER AND DIRECTORY SETUP ----
 
 # 1. Create user only if missing.
 if ! id "$USER_NAME" &>/dev/null; then
@@ -54,4 +71,4 @@ EOF
 
 echo "✅ Setup complete. Now open a new bash tab, run su - $USER_NAME, and you're ready!"
 
-# Optionally, log results to README.md or setup.log for future reproducibility.
+# Optionally, log results to README.md or setup.log for reproducibility.
