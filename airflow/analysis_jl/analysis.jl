@@ -11,36 +11,46 @@ include("../helpers_jl/csv_from_txt_loader.jl")
 using .CsvFromTxtLoader        # For project-specific raw weather data loading
 
 """
-    main()
+main()
 
 Main entry point for weather data processing and summary export.
 
-Steps:
-- Loads raw weather data using a custom Txt/CSV loader (must have columns: "date", "weather_code", "temp_max", "temp_min").
-- Ensures "year" column is extracted from "date" (robust to both String and Date types).
-- Adds human-readable weather descriptions via project lookup dictionary (Constants.WEATHERCODE_LOOKUP).
-- Groups all data by year and weather type.
-- Aggregates:
-    * Frequency/count per group
-    * Mean, min, max, std (standard deviation) for both max and min temperatures
-- Prints summary statistics, schema, and first rows for inspection.
-- Writes the result to a summary CSV and manifest for downstream R/Python use.
+Workflow:
+- Loads raw weather data using a custom Txt/CSV loader.
+- Extracts "year" from "date" column (supports both String and Date types).
+- Maps weather codes to human-readable descriptions using Constants.WEATHERCODE_LOOKUP.
+- Groups records by year, weather code, and description.
+- Aggregates group statistics:
+    * Count (frequency)
+    * Mean/max/min/std for temp_max and temp_min
+- Replaces undefined std values (NaN) with missing for clean downstream analysis/plotting.
+- Prints summary, schema, and example rows for inspection.
+- Exports summary DataFrame to platform-wide CSV and writes manifest for cross-language handoff.
+
+Returns:
+    Nothing (writes outputs and prints inspection info).
+Writes:
+    - summary table CSV at Constants.EXPORTED_CSV_PATH
+    - manifest file at Constants.WEATHER_SUMMARY_CSV_MANIFEST
+
+Usage:
+    Run this file directly with Julia to perform weather summary ETL and cross-language export.
 """
 function main()
-    # 1. Load raw weather data (column names: date, weather_code, temp_max, temp_min)
+    # 1. Load raw weather data (must have: "date", "weather_code", "temp_max", "temp_min")
     df_raw = CsvFromTxtLoader.load_csv_from_txt()
 
-    # 2. Data wrangling and robust weather summary export
+    # 2. Data wrangling and summary aggregation
     grouped_df = @chain df_raw begin
-        # Add year column from date, robust for String or Date types
+        # Add year column from date, robust to String/Date formats
         DataFrames.transform(_, :date => ByRow(x -> isa(x, Dates.Date) ? Dates.year(x) : Dates.year(Date(x, "yyyy-mm-dd"))) => :year)
-        # Add human-readable weather description by code lookup
+        # Add weather description by code lookup
         DataFrames.transform(_, :weather_code => ByRow(x -> get(Constants.WEATHERCODE_LOOKUP, x, "Unknown")) => :weather_desc)
-        # Group by year, weather code, and description
+        # Group by year, weather code, weather description
         DataFrames.groupby(_, [:year, :weather_code, :weather_desc])
-        # Aggregate count and temperature statistics per group
+        # Aggregate group stats: frequency, summary statistics for temperature
         DataFrames.combine(_,
-            nrow => :count,                           # Frequency per group
+            nrow => :count,                               # frequency per group
             :temp_max => mean => :mean_tempmax,
             :temp_max => minimum => :min_tempmax,
             :temp_max => maximum => :max_tempmax,
@@ -52,7 +62,7 @@ function main()
         )
     end
 
-    # 3. Inspection: print summary, schema, and first rows
+    # 3. Inspection and diagnostics
     println("\n==== Weather Summary Data Overview ====")
     println("Rows: ", nrow(grouped_df), " | Columns: ", ncol(grouped_df))
     println("Columns: ", names(grouped_df))
@@ -63,7 +73,12 @@ function main()
     println("\nEntire grouped summary example:")
     println(grouped_df)
 
-    # 4. Export: save summary DataFrame to CSV, and write manifest (absolute path) for cross-language use
+    # 3b. Make std columns robust for plotting/analysis: replace NaN with missing
+    # This prevents undefined error bars and plotting/statistics issues downstream
+    grouped_df.std_tempmax = replace(grouped_df.std_tempmax, NaN => missing)
+    grouped_df.std_tempmin = replace(grouped_df.std_tempmin, NaN => missing)
+
+    # 4. Export: save summary DataFrame to CSV and write manifest for cross-language use
     export_dir = dirname(Constants.EXPORTED_CSV_PATH)
     if !isdir(export_dir)
         mkpath(export_dir)
