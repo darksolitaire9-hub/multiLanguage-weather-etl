@@ -1,14 +1,20 @@
+# airflow/helpers_R/load_weather_summary_csv.R
+
 # ----------------------------------------------------------------------
 # Helper to load the weather summary CSV using path from manifest (robust)
-# ----------------------------------------------------------------------
-
+#
 # Usage:
-#   source("airflow/helpers_R/load_weather_summary_csv.R")
+#   library(here)
+#   source(here::here("airflow", "config", "constants.R"))
+#   source(here::here("airflow", "helpers_R", "get_weather_summary_path.R"))
+#   source(here::here("airflow", "helpers_R", "load_weather_summary_csv.R"))
 #   df <- load_weather_summary_csv()
 #   print(head(df))
+# ----------------------------------------------------------------------
 
-source("airflow/config/constants.R")
-source("airflow/helpers_R/get_weather_summary_path.R")
+library(here)
+source(here::here("airflow", "config", "constants.R"))
+source(here::here("airflow", "helpers_R", "get_weather_summary_path.R"))
 
 load_weather_summary_csv <- function(manifest_path = MANIFEST_PATH, ...) {
   csv_path <- get_weather_summary_path(manifest_path)

@@ -4,7 +4,8 @@
 # Helper function to retrieve the path to the exported weather summary CSV file.
 #
 # Workflow:
-#   - Sourced constants.R, which defines MANIFEST_PATH (location of manifest file)
+#   - Sources constants.R from project root using here::here(), which defines
+#     MANIFEST_PATH (location of manifest file, typically relative to project root).
 #   - Manifest file should contain one line: absolute path to the weather summary CSV
 #
 # Function:
@@ -17,12 +18,15 @@
 #   (character) Absolute path to weather_summary.csv as written by Julia pipeline.
 #   Throws an error if manifest or referenced CSV does not exist.
 #
-# Usage:
-#   source('../config/constants.R')
-#   source('helpers/get_weather_summary_path.R')
+# Usage (recommended for full reproducibility):
+#   library(here)
+#   source(here::here("airflow", "config", "constants.R"))
+#   source(here::here("airflow", "helpers_R", "get_weather_summary_path.R"))
 #   csv_path <- get_weather_summary_path()
 # --------------------------------------------------------------------------------
-source('airflow/config/constants.R')
+
+library(here)
+source(here::here("airflow", "config", "constants.R"))
 
 get_weather_summary_path <- function(manifest_path = MANIFEST_PATH) {
   # Check that manifest file exists
@@ -40,6 +44,7 @@ get_weather_summary_path <- function(manifest_path = MANIFEST_PATH) {
     stop(paste("CSV file does not exist:", path))
   }
   # Return CSV path
+  print(paste("Retrieved weather summary CSV path from manifest:", path))
   return(path)
 }
 
