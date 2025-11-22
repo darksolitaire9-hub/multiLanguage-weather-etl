@@ -4,3 +4,5 @@ library(ggplot2)       # For plotting
 library(dplyr)         # For tidy data manipulation
 library(viridisLite)   # For color palettes
 library(gganimate)     # For animated plots
+library(av)            # MP4/video export via ffmpeg
+
