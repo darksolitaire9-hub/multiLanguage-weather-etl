@@ -39,6 +39,8 @@ Usage:
 function main()
     # 1. Load raw weather data (must have: "date", "weather_code", "temp_max", "temp_min")
     df_raw = CsvFromTxtLoader.load_csv_from_txt()
+    println("df_raw:", df_raw)
+    println("Type of df_raw:", typeof(df_raw))
 
     # 2. Data wrangling and summary aggregation
     grouped_df = @chain df_raw begin

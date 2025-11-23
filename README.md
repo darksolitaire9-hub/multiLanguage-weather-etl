@@ -530,3 +530,38 @@ multiLanguage-weather-etl/
 
 - Locale warnings during R batch execution are harmless for ASCII/English workflows.
 - For multi-language functionality, analogous helpers/configs exist for Julia and Python.
+
+---
+
+## 🗓️ [2025-11-22] Major Setup Refactor: Local Airflow venv, No Global Symlink, Improved Onboarding
+
+**Today's tasks & solutions:**
+
+- Refactored all Airflow installation so it now uses only a local, project-rooted Python virtual environment (`.venv`).
+    - Airflow and all dependencies are now installed/run exclusively inside `.venv` using `uv pip install`.
+    - Removed the old setup step of installing Airflow in `/opt/airflow-venv` and symlinking to `/usr/local/bin/airflow`. This step is now considered redundant and has been deleted from all setup scripts.
+    - All onboarding now *requires* every user to create, activate, and install Airflow locally in their own `.venv`. Airflow is no longer available globally.
+- Ensured onboarding for contributors is fully reproducible:
+    - Setup guides/scripts explain that `which airflow` must resolve to `.venv/bin/airflow` within the repo root, never to a global path.
+    - README updated to strongly advise against global Airflow use.
+- Removed global system Airflow installations to prevent environment ambiguity, path conflicts, and version mismatches.
+    - No more `/usr/local/bin/airflow`, no reliance on `/opt/airflow-venv`.
+    - VS Code/Jupyter now reliably find project dependencies.
+- Validated that CI, Codespaces, and all collaborators will get a clean, isolated, portable setup.
+- (Bonus) Improved `dev_setup.sh` for readability and clarity, with dev kernels for Jupyter/R/Julia highlighted separately.
+
+**Why this matters:**  
+- No more version mismatches, missing CLI errors, or "works on my machine" surprises.
+- Every dev, Codespace, and CI job uses identical, reproducible Airflow and Python deps.
+- Makes the project onboarding, teaching, and collaborating much smoother.
+
+**Example verification from today's work:**
+```
+source .venv/bin/activate
+uv pip install "apache-airflow[celery,postgres,sqlite]==2.9.1"
+which airflow # outputs .../multiLanguage-weather-etl/.venv/bin/airflow
+airflow standalone # starts local webserver/scheduler, not global!
+
+```
+
+*Workflow, script, and install method validated 2025-11-22. All global Airflow install methods now deprecated in this repo.*

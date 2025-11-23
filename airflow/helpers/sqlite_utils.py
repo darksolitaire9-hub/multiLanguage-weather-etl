@@ -1,8 +1,8 @@
 import os
 import sqlite3
 import polars as pl
-from .csv_path_writer import save_exported_csv_path_if_missing
-from ..config.constants import DB_PATH, EXPORT_QUERY, EXPORT_CSV
+from helpers.csv_path_writer import save_exported_csv_path_if_missing
+from config.constants import DB_PATH, EXPORT_QUERY, EXPORT_CSV
 
 def export_sqlite_to_csv_with_polars(
     sqlite_db_path=DB_PATH,

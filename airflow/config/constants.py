@@ -38,6 +38,11 @@ DIRECTION = FORWARD         # Choose direction (FORWARD/BACKWARD) for current ex
 START_YEAR = 2015           # Anchor year (starting point for data retrieval)
 NUM_YEARS = 5               # Number of years to include (from anchor)
 
+
+# --- For Julia ETL runs ---
+
+JULIA_SUMMARY_SCRIPT_PATH = "/workspaces/multiLanguage-weather-etl/airflow/analysis_jl/analysis.jl"
+
 # ------------------------------------------
 # End of configuration
 # ------------------------------------------

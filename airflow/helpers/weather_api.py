@@ -1,8 +1,8 @@
 import requests
 from pprint import pprint
-from .geocode_utils import get_city_coordinates
-from .date_utils import get_interval_start_to_end_dates
-from ..config.constants import CITY_NAME, COUNTRY, WEATHER_API_URL, DAILY_VARIABLES, START_YEAR, TIMEZONE, NUM_YEARS, DIRECTION
+from helpers.geocode_utils import get_city_coordinates
+from helpers.date_utils import get_interval_start_to_end_dates
+from config.constants import CITY_NAME, COUNTRY, WEATHER_API_URL, DAILY_VARIABLES, START_YEAR, TIMEZONE, NUM_YEARS, DIRECTION
 
 # Get date strings for the requested interval
 start_date, end_date = get_interval_start_to_end_dates(START_YEAR, NUM_YEARS, DIRECTION)
