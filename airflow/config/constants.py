@@ -39,9 +39,11 @@ START_YEAR = 2015           # Anchor year (starting point for data retrieval)
 NUM_YEARS = 5               # Number of years to include (from anchor)
 
 
-# --- For Julia ETL runs ---
+# config/constants.py
+REPO_ROOT = "/workspaces/multiLanguage-weather-etl"
+JULIA_SUMMARY_SCRIPT_PATH = f"{REPO_ROOT}/airflow/analysis_jl/analysis.jl"
+R_ANIMATION_SCRIPT_PATH = f"{REPO_ROOT}/airflow/visualizations/yearly_weather_trends.R"
 
-JULIA_SUMMARY_SCRIPT_PATH = "/workspaces/multiLanguage-weather-etl/airflow/analysis_jl/analysis.jl"
 
 # ------------------------------------------
 # End of configuration
