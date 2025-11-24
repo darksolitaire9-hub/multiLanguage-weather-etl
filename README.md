@@ -565,3 +565,47 @@ airflow standalone # starts local webserver/scheduler, not global!
 ```
 
 *Workflow, script, and install method validated 2025-11-22. All global Airflow install methods now deprecated in this repo.*
+
+## 🗓️ [2025-11-24] ETL DAG Complete, Airflow Setup Notes, Visualization Pipeline Working
+
+**Progress Achieved:**
+- End-to-end ETL pipeline Airflow DAG is complete and operational.
+  - Automatically creates a local SQLite weather table.
+  - Fetches yearly weather data for each configured city.
+  - Performs analysis on historical weather records.
+  - Generates a visualization video of results—saved in `airflow/visualization/media`.
+
+---
+
+### Airflow Startup - Essential Environment Variables
+
+Before running Airflow (especially in a devcontainer or Codespaces):
+
+1. **Set your Airflow home directory each session:**
+```bash
+export AIRFLOW_HOME=$(pwd)/airflow
+```
+This ensures Airflow uses your project’s config/logs and keeps operations reproducible.
+
+2. **API Auth Reminder:**  
+A valid API authentication secret must be set. _Check project onboarding or .env setup for details._
+
+3. **Start Airflow with:**
+```
+airflow standalone
+```
+
+---
+
+### What’s Working Today
+
+- Full ETL DAG: From data extraction, SQLite table creation, weather fetch, analysis, to final video visualization—all automated in Airflow.
+- Output video is saved in `airflow/visualization/media` for easy review and sharing.
+
+---
+
+Today's workflow proves reproducible data engineering, analysis, and visualization using Airflow in a container-native project.
+
+*As always, update `.env`, Airflow config, and paths as described above to avoid startup and authentication problems.*
+
+**Documented:** 2025-11-24.
