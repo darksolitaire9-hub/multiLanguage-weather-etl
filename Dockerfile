@@ -6,18 +6,20 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=C.UTF-8 \
     AIRFLOW_HOME=/workspaces/multiLanguage-weather-etl/airflow
 
-# Install ALL system dependencies in one layer
+# Install minimal base packages first (fail-fast optimization)
 RUN apt-get update && apt-get install -y \
-    git curl wget build-essential ca-certificates software-properties-common \
-    python3 python3-venv \
-    r-base r-base-dev \
-    libcurl4-openssl-dev libssl-dev libxml2-dev \
-    ffmpeg \
-    bzip2 unzip \
-    sqlite3 libsqlite3-dev \
+    curl \
+    ca-certificates \
+    git \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Julia 1.10.3
+# Install uv FIRST and verify it works (fail-fast if uv installation fails)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv /usr/local/bin/uv && \
+    uv --version
+
+# Install Julia 1.10.3 (fast, independent installation)
 RUN JULIA_VER="1.10.3" && \
     JULIA_TAR="julia-${JULIA_VER}-linux-x86_64.tar.gz" && \
     JULIA_URL="https://julialang-s3.julialang.org/bin/linux/x64/1.10/${JULIA_TAR}" && \
@@ -26,9 +28,23 @@ RUN JULIA_VER="1.10.3" && \
     ln -sf /opt/julia-${JULIA_VER}/bin/julia /usr/local/bin/julia && \
     rm /tmp/"${JULIA_TAR}"
 
-# Install uv using official installer
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    mv /root/.cargo/bin/uv /usr/local/bin/uv
+# Now install heavy system dependencies (Python, R, ffmpeg, etc.)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    software-properties-common \
+    python3 \
+    python3-venv \
+    r-base \
+    r-base-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    ffmpeg \
+    bzip2 \
+    unzip \
+    sqlite3 \
+    libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspaces/multiLanguage-weather-etl
 
