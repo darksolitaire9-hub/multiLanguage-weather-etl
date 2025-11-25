@@ -1,17 +1,20 @@
 # ===== AIRFLOW (ignore all runtime/generated Airflow files except version-controlled DAGs) =====
-airflow/
+airflow/*
 !airflow/dags/
-!airflow/dags/**  # (un-ignore all files and subfolders for DAGs)
-!airflow/airflow.cfg.example # (optional: if you ever have a distributed example config)
+!airflow/dags/**
+!airflow/config/
+!airflow/config/**
+!airflow/helpers/
+!airflow/helpers/**
+!airflow/airflow.cfg.example
 
-airflow/airflow.db
-airflow/airflow.db-shm
-airflow/airflow.db-wal
-airflow/logs/
-airflow/webserver_config.py
-airflow/*.pid
-airflow/*.err
-airflow/*.log
+airflow/config/export_csv_path.txt
+!airflow/helpers_jl/
+!airflow/helpers_jl/**.jl
+!airflow/analysis_jl/
+!airflow/analysis_jl/
+
+
 
 # ===== DATA (ignore generated and test data, not source datasets/scripts) =====
 data/*.db
@@ -21,18 +24,27 @@ data/*.db-wal
 data/*.csv
 data/*.json
 data/*.xlsx
-
+data/*.txt
+/data
 # ===== R =====
 .Rhistory
 .RData
 .Rproj.user/
 *.Rproj
+!helpers_R/
+!helpers_R/**.R 
+!visualizations
+!visualizations/*.R
+!visualizations/**/*.R
 
 # ===== JULIA =====
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
-Manifest.toml
+
+
+# manifest dir
+manifests/
 
 # ===== PYTHON =====
 __pycache__/

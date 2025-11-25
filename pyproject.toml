@@ -1,0 +1,12 @@
+[project]
+name = "multiLanguage-weather-etl"
+version = "0.1.0"
+description = "ETL pipeline for historical and predictive weather analysis."
+authors = [
+    { name = "darksolitaire9", email = "darksolitaire9+etl@gmail.com" }
+]
+dependencies = [
+    "requests",
+    "polars",
+    "pyarrow"
+]
