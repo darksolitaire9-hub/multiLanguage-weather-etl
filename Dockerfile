@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Install ALL system dependencies in one layer
 RUN apt-get update && apt-get install -y \
     git curl wget build-essential ca-certificates software-properties-common \
-    python3 python3-venv python3-pip \
+    python3 python3-venv \
     r-base r-base-dev \
     libcurl4-openssl-dev libssl-dev libxml2-dev \
     ffmpeg \
@@ -26,8 +26,9 @@ RUN JULIA_VER="1.10.3" && \
     ln -sf /opt/julia-${JULIA_VER}/bin/julia /usr/local/bin/julia && \
     rm /tmp/"${JULIA_TAR}"
 
-# Install uv
-RUN pip3 install --no-cache-dir uv
+# Install uv using official installer
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.cargo/bin/uv /usr/local/bin/uv
 
 WORKDIR /workspaces/multiLanguage-weather-etl
 
@@ -36,12 +37,11 @@ COPY pyproject.toml uv.lock* ./
 COPY Project.toml Manifest.toml* ./
 COPY renv.lock renv/ dependency.R ./
 
-# Install Python deps
-RUN python3 -m venv .venv && \
-    . .venv/bin/activate && \
-    uv pip install --upgrade pip setuptools wheel && \
-    uv pip install "apache-airflow[celery,postgres,sqlite]==2.9.1" && \
-    uv pip install -e .
+# Install Python deps using uv sync
+RUN uv sync --frozen
+
+# Install Airflow separately (if not in pyproject.toml)
+RUN uv pip install "apache-airflow[celery,postgres,sqlite]==2.9.1"
 
 # Install R deps
 RUN R -e "install.packages('renv', repos='https://cloud.r-project.org')" && \
@@ -51,9 +51,8 @@ RUN R -e "install.packages('renv', repos='https://cloud.r-project.org')" && \
 RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
 # Install Jupyter kernels
-RUN . .venv/bin/activate && \
-    uv pip install ipykernel && \
-    python3 -m ipykernel install --user --name python3
+RUN uv pip install ipykernel && \
+    uv run python -m ipykernel install --user --name python3
 
 RUN R -e "install.packages('IRkernel', repos='https://cloud.r-project.org'); IRkernel::installspec(user = FALSE)"
 
