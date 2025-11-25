@@ -57,4 +57,4 @@ julia --version
 apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 echo "✅ All dev tools, Python (.venv + uv), Airflow (local), R, and Julia installed.
-cho "➡️  Activate with: source .venv/bin/activate"
+echo "⚡ Activate with: source .venv/bin/activate"
