@@ -53,16 +53,8 @@ rm "/tmp/${JULIA_TAR}"
 echo "Testing Julia install..."
 julia --version
 
-# --------- Jupyter kernels for Python, R, Julia ---------
-uv pip install ipykernel
-python3 -m ipykernel install --user --name python3
-
-R -e 'if (!require("IRkernel")) install.packages("IRkernel", repos="https://cloud.r-project.org"); IRkernel::installspec(user = FALSE)'
-
-julia -e 'using Pkg; Pkg.add("IJulia"); using IJulia; IJulia.notebook()'
-
 # Clean up
 apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-echo "✅ All dev tools, Python (.venv + uv), Airflow (local), R, Julia, and Jupyter kernels installed."
-echo "➡️  Activate with: source .venv/bin/activate"
+echo "✅ All dev tools, Python (.venv + uv), Airflow (local), R, and Julia installed.
+cho "➡️  Activate with: source .venv/bin/activate"
