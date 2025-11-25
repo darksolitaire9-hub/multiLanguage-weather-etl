@@ -44,6 +44,11 @@ RUN apt-get update && apt-get install -y \
     unzip \
     sqlite3 \
     libsqlite3-dev \
+      cmake \
+        gdal-bin \
+          libavfilter-dev \
+            libgdal-dev \
+              libudunits2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspaces/multiLanguage-weather-etl
