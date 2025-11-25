@@ -1,7 +1,10 @@
 {
   "name": "Multi-Language Weather ETL",
-  "image": "ubuntu:22.04",
-  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  
   "customizations": {
     "vscode": {
       "extensions": [
@@ -13,15 +16,18 @@
       ]
     }
   },
+  
   "forwardPorts": [8080],
+  
   "portsAttributes": {
     "8080": {
       "label": "Airflow Web UI",
       "onAutoForward": "notify"
     }
-  }
-
-  ,
+  },
+  
+  "postCreateCommand": "echo '✅ Environment ready! Activate with: source .venv/bin/activate'",
+  
   "containerEnv": {
     "LANG": "C.UTF-8",
     "LC_ALL": "C.UTF-8"
