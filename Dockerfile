@@ -71,11 +71,6 @@ RUN R -e "install.packages('renv', repos='https://cloud.r-project.org')" && \
 # Install Julia deps
 RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
-# Install Jupyter kernels
-RUN uv pip install ipykernel && \
-    uv run python -m ipykernel install --user --name python3
-
-RUN R -e "install.packages('IRkernel', repos='https://cloud.r-project.org'); IRkernel::installspec(user = FALSE)"
 
 # Cleanup
 RUN apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
