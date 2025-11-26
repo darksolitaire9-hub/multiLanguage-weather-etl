@@ -9,7 +9,6 @@
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "REditorSupport.r",
         "julialang.language-julia",
         "github.vscode-pull-request-github"
       ]
@@ -25,7 +24,7 @@
     }
   },
   
-  "postCreateCommand": "echo '✅ Environment ready! Activate with: source .venv/bin/activate'",
+  "postCreateCommand": bash ./project-setup.sh
   
   "containerEnv": {
     "LANG": "C.UTF-8",
