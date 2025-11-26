@@ -26,8 +26,7 @@ jobs:
     
     - name: Install Python dependencies
       run: |
-        uv pip install --system .
-    
+            uv pip install --system requests polars pyarrow    
     - name: Run Python linting
       run: |
         python -m pylint --version || echo "pylint not required"
