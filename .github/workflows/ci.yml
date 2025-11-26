@@ -41,7 +41,7 @@ jobs:
               - name: Install R system dependencies
                       run: |
                                 sudo apt-get update
-                                          sudo apt-get install -y build-essential r-base-dev libcurl4-openssl-dev libssl-dev libxml2-dev
+                                          sudo apt-get install -y build-essential r-base-dev libcurl4-openssl-dev libssl-dev libxml2-dev libavfilter-dev libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev ffmpeg
     
     - name: Install R dependencies
       run: |
