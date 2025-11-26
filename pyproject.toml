@@ -10,3 +10,9 @@ dependencies = [
     "polars",
     "pyarrow"
 ]
+
+[tool.setuptools.packages.find]
+# Only include the main Python package & helpers (adjust "airflow*" if needed)
+include = ["airflow*"]
+# Exclude all non-Python code and folders to avoid setuptools errors
+exclude = ["renv*", "helpers_R*", "helpers_jl*", "julia*", "R*"]
