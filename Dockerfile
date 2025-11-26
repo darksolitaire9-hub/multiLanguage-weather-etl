@@ -47,6 +47,11 @@ RUN apt-get update && apt-get install -y \
       cmake \
         gdal-bin \
           libavfilter-dev \
+                  libavformat-dev \
+                          libavcodec-dev \
+                                  libavdevice-dev \
+                                          libavutil-dev \
+                                                  libswscale-dev \
             libgdal-dev \
               libudunits2-dev \
     && rm -rf /var/lib/apt/lists/*
