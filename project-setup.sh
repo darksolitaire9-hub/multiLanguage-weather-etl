@@ -119,6 +119,10 @@ else
 fi
 
 echo "✅ Setup complete. Now open a new bash tab, run su - $USER_NAME, and you're ready!"
+
+echo ""
+echo "💡 Remember: To use Python/Airflow, activate the virtual environment with:"
+echo "   source .venv/bin/activate"
 EOF
 
 echo "🎉 Auto-setup script finished successfully!"
