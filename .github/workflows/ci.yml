@@ -50,6 +50,11 @@ jobs:
         r-version: '4.3'
     
     # Cache R packages from renv
+        
+    - name: Install R system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
     - name: Cache R dependencies
       uses: actions/cache@v4
       with:
