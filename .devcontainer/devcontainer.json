@@ -1,7 +1,7 @@
 {
   "name": "Multi-Language Weather ETL",
   "dockerfile": "Dockerfile",
-  "context": "..",
+  "context": ".",
   "workspaceFolder": "/workspaces/multiLanguage-weather-etl",
   "remoteUser": "vscode",
   
