@@ -1,87 +1,140 @@
-name: Multi-Language Weather ETL CI
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04  # Match your devcontainer
+  setup-and-test:
+    runs-on: ubuntu-latest
     
+    # Cache strategy: Store all dependencies between runs
     steps:
-      - uses: actions/checkout@v3
-      
-      # OS Detection (for debugging)
-      - name: Verify OS
+      - uses: actions/checkout@v4
+
+      # ─────────────────────────────────────────────────────
+      # 1. SYSTEM DEPENDENCIES (Fast: pre-cached on ubuntu-latest)
+      # ─────────────────────────────────────────────────────
+      - name: Install system dependencies
         run: |
-          cat /etc/os-release
-          echo "Running on: $(uname -s)"
-      
-      # Python Setup with uv
-      - name: Setup Python
-        uses: actions/setup-python@v4
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential git ca-certificates \
+            r-base r-dev \
+            ffmpeg gh
+
+      # ─────────────────────────────────────────────────────
+      # 2. PYTHON + UV (Fastest: uv is pre-installed on Ubuntu 24.04+)
+      # ─────────────────────────────────────────────────────
+      - name: Set up Python with uv
+        uses: astral-sh/setup-uv@v2
         with:
-          python-version: '3.11'
-          
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          
-      # R Setup (Ubuntu specific)
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v2
+          python-version: "3.11"
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
         with:
-          r-version: 'release'
-          
-      - name: Install R system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libcurl4-openssl-dev \
-            libssl-dev \
-            libxml2-dev \
-            libfontconfig1-dev \
-            libharfbuzz-dev \
-            libfribidi-dev \
-            libfreetype6-dev \
-            libpng-dev \
-            libtiff5-dev \
-            libjpeg-dev \
-            r-cran-readr \
-            r-cran-dplyr
-            
-      - name: Cache R packages
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: r-packages-${{ hashFiles('**/DESCRIPTION') }}
-          
-      # Julia Setup
-      - name: Setup Julia
-        uses: julia-actions/setup-julia@v1
-        with:
-          version: '1.9'
-          
-      # Install your project dependencies
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-uv-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
       - name: Install Python dependencies
         run: |
-          source $HOME/.cargo/env
           uv venv .venv
           source .venv/bin/activate
-          uv pip install .
-          
-      # Test R helpers
+          uv pip install "apache-airflow[celery,sqlite]==2.9.1"
+          uv pip install pytest pytest-cov
+
+      # ─────────────────────────────────────────────────────
+      # 3. R PACKAGES (Cached)
+      # ─────────────────────────────────────────────────────
+      - name: Cache R packages
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/lib/R/site-library
+          key: ${{ runner.os }}-R-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-R-
+
+      - name: Set up R packages
+        run: |
+          Rscript -e 'if (!require("renv")) install.packages("renv"); renv::restore()'
+
+      # ─────────────────────────────────────────────────────
+      # 4. JULIA (Cached depot)
+      # ─────────────────────────────────────────────────────
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: "1.10"
+
+      - name: Cache Julia packages
+        uses: julia-actions/cache@v1
+
+      - name: Instantiate Julia project
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+      # ─────────────────────────────────────────────────────
+      # 5. RUN TESTS (All languages)
+      # ─────────────────────────────────────────────────────
+      - name: Lint Python (Ruff)
+        run: |
+          source .venv/bin/activate
+          uv pip install ruff
+          ruff check airflow/ tests/
+
+      - name: Test Python DAGs
+        run: |
+          source .venv/bin/activate
+          export AIRFLOW_HOME=$(pwd)/airflow
+          pytest tests/unit/ -v --tb=short
+
+      - name: Validate Airflow DAGs
+        run: |
+          source .venv/bin/activate
+          export AIRFLOW_HOME=$(pwd)/airflow
+          airflow dags list
+          airflow dags lint
+
       - name: Test R helpers
         run: |
-          Rscript airflow/helpers_R/get_weather_summary_path.R || echo "R helper test skipped"
-          
-      # Verify installations
-      - name: Verify all languages
+          Rscript tests/test_r_helpers.R
+
+      - name: Test Julia helpers
         run: |
-          python --version
-          uv --version
-          R --version
-          julia --version
+          julia --project=. tests/test_julia_helpers.jl
+
+      # ─────────────────────────────────────────────────────
+      # 6. INTEGRATION TEST: Full ETL Pipeline (Optional)
+      # ─────────────────────────────────────────────────────
+      - name: Run integration test (ETL pipeline)
+        run: |
+          source .venv/bin/activate
+          export AIRFLOW_HOME=$(pwd)/airflow
+          # Optional: Run a test DAG execution
+          airflow dags test weather_etl_dag $(date +%Y-%m-%d)
+
+      # ─────────────────────────────────────────────────────
+      # 7. UPLOAD COVERAGE (Optional)
+      # ─────────────────────────────────────────────────────
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: unittests
+
+  # ─────────────────────────────────────────────────────────
+  # Optional: Separate Job for Documentation Build
+  # ─────────────────────────────────────────────────────────
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: pip install sphinx
+      - run: sphinx-build -W -b html docs/ docs/_build/
