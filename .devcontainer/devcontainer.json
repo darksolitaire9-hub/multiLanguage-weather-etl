@@ -24,7 +24,7 @@
     }
   },
   
-  "postCreateCommand": bash ./project-setup.sh
+  "postCreateCommand": "bash ./project-setup.sh",
   
   "containerEnv": {
     "LANG": "C.UTF-8",
