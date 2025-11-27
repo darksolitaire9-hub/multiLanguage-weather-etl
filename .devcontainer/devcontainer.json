@@ -1,33 +1,53 @@
 {
   "name": "Multi-Language Weather ETL",
-  "build": {
-    "dockerfile": "../Dockerfile",
-    "context": ".."
-  },
+  "dockerfile": "Dockerfile",
+  "context": "..",
+  "workspaceFolder": "/workspaces/multiLanguage-weather-etl",
+  "remoteUser": "vscode",
+  
+  "mounts": [
+    "source=${localEnv:HOME}/.julia,target=/home/vscode/.julia,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.cache/pip,target=/home/vscode/.cache/pip,type=bind,consistency=cached"
+  ],
   
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
+        "ms-python.vscode-pylance",
+        "REditorSupport.r",
         "julialang.language-julia",
-        "github.vscode-pull-request-github"
-      ]
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "GitHub.copilot",
+        "eamodio.gitlens",
+        "ms-vscode.makefile-tools"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/python-venv/bin/python",
+        "python.formatting.provider": "black",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "r.rpath": "/usr/bin/R",
+        "r.linterOptions": ["--no-save", "--quiet"],
+        "[julia]": {
+          "editor.defaultFormatter": "julialang.language-julia",
+          "editor.formatOnSave": true
+        },
+        "julia.environmentPath": "/workspaces/multiLanguage-weather-etl",
+        "jupyter.kernels.filter": ["julia", "python3", "ir"]
+      }
     }
   },
+  
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "echo '✅ Multi-Language Weather ETL environment ready! Start with: airflow standalone' && python --version && julia --version && R --version",
   
   "forwardPorts": [8080],
-  
   "portsAttributes": {
     "8080": {
-      "label": "Airflow Web UI",
+      "label": "Airflow UI",
       "onAutoForward": "notify"
     }
-  },
-  
-  "postCreateCommand": "bash ./project-setup.sh",
-  
-  "containerEnv": {
-    "LANG": "C.UTF-8",
-    "LC_ALL": "C.UTF-8"
   }
 }
