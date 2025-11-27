@@ -1,60 +1,70 @@
 #!/bin/bash
-set -euxo pipefail
+set -e
 
-# ---- Core system dependencies ----
-export DEBIAN_FRONTEND=noninteractive
-apt-get update && apt-get upgrade -y
-apt-get install -y git curl wget ca-certificates build-essential software-properties-common \
-    locales libssl-dev libcurl4-openssl-dev libxml2-dev \
-    libsqlite3-dev sqlite3 bzip2 unzip ffmpeg
+echo "🚀 Setting up Multi-Language Weather ETL environment..."
 
-# ---- GitHub CLI ----
-type -p curl >/dev/null || apt-get install -y curl
-curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
-  dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
-  tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-apt-get update && apt-get install -y gh
+# Activate Python venv
+source /opt/python-venv/bin/activate
+export AIRFLOW_HOME=$(pwd)/airflow
 
-# ---- Python (latest, with venv and uv) ----
-apt-get install -y python3 python3-venv python3-pip
-update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+# ============================================
+# Initialize Airflow (project-local)
+# ============================================
+echo "📦 Initializing Airflow..."
+mkdir -p $AIRFLOW_HOME/dags
+mkdir -p $AIRFLOW_HOME/logs
+mkdir -p $AIRFLOW_HOME/plugins
 
-pip3 install --upgrade uv
-apt-get remove -y python3-pip
-apt-get autoremove -y
+# Only init if not already initialized
+if [ ! -f "$AIRFLOW_HOME/airflow.db" ]; then
+    airflow db init
+    echo "✅ Airflow initialized at: $AIRFLOW_HOME"
+else
+    echo "✅ Airflow already initialized (found airflow.db)"
+fi
 
-# ---- Project Python virtual environment + Airflow install ----
-python3 -m venv .venv
-source .venv/bin/activate
-uv pip install --upgrade pip setuptools wheel
-uv pip install "apache-airflow[celery,postgres,sqlite]==2.9.1"
-# If you have other deps, uncomment next line:
-# uv pip install -r requirements.txt
+# ============================================
+# Julia: Instantiate project environment
+# ============================================
+echo "📦 Setting up Julia environment..."
+if [ -f "Project.toml" ]; then
+    julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()' && echo "✅ Julia environment ready" || echo "⚠️  Julia setup skipped (optional)"
+else
+    echo "⚠️  Project.toml not found, skipping Julia setup"
+fi
 
-# --------- R base install ---------
-apt-get install -y --no-install-recommends r-base r-base-dev
+# ============================================
+# R: Restore renv (if available)
+# ============================================
+echo "📦 Setting up R environment..."
+if [ -f "renv.lock" ]; then
+    export R_LIBS_USER="/opt/R-packages"
+    Rscript -e 'renv::restore()' && echo "✅ R environment ready" || echo "⚠️  renv::restore() skipped (optional)"
+else
+    echo "⚠️  renv.lock not found, skipping R package restore"
+fi
 
-# --------- Julia install ---------
-JULIA_VER="1.10.3"
-JULIA_TAR="julia-${JULIA_VER}-linux-x86_64.tar.gz"
-JULIA_URL="https://julialang-s3.julialang.org/bin/linux/x64/1.10/${JULIA_TAR}"
-
-echo "Downloading Julia from $JULIA_URL"
-wget -O "/tmp/${JULIA_TAR}" "${JULIA_URL}"
-tar -xzf "/tmp/${JULIA_TAR}" -C /tmp
-rm -rf /opt/julia
-mv "/tmp/julia-${JULIA_VER}" /opt/julia
-ln -sf /opt/julia/bin/julia /usr/local/bin/julia
-export PATH="/usr/local/bin:${PATH}"
-rm "/tmp/${JULIA_TAR}"
-
-echo "Testing Julia install..."
-julia --version
-
-# Clean up
-apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-echo "✅ All dev tools, Python (.venv + uv), Airflow (local), R, and Julia installed.
-echo "⚡ Activate with: source .venv/bin/activate"
+# ============================================
+# Summary
+# ============================================
+echo ""
+echo "════════════════════════════════════════"
+echo "✨ Setup Complete!"
+echo "════════════════════════════════════════"
+echo ""
+echo "🐍 Python:  $(python --version)"
+echo "📦 Airflow: $(airflow version)"
+echo "🧮 Julia:   $(julia --version 2>&1 | head -1)"
+echo "📊 R:       $(R --version 2>&1 | head -1)"
+echo ""
+echo "📝 Next steps:"
+echo ""
+echo "   1. Export Airflow home (if not already set):"
+echo "      export AIRFLOW_HOME=\$(pwd)/airflow"
+echo ""
+echo "   2. Start Airflow webserver:"
+echo "      airflow standalone"
+echo ""
+echo "   3. Access Airflow UI at: http://localhost:8080"
+echo ""
+echo "════════════════════════════════════════"
