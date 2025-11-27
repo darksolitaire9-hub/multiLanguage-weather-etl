@@ -10,9 +10,27 @@ sudo apt-get install -y --no-install-recommends \
   git \
   ca-certificates \
   r-base \
-  r-dev \
+  r-base-dev \
   ffmpeg \
+  libavfilter-dev \
+  gdal-bin \
+  libgdal-dev \
+  libgeos-dev \
+  libproj-dev \
   gh
+
+    gh
+
+echo ""
+echo "🧮 Installing Julia..."
+wget -q https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.7-linux-x86_64.tar.gz
+tar -xzf julia-1.10.7-linux-x86_64.tar.gz
+sudo mv julia-1.10.7 /opt/julia
+sudo ln -s /opt/julia/bin/julia /usr/local/bin/julia
+rm julia-1.10.7-linux-x86_64.tar.gz
+julia --version
+
+
 
 echo ""
 echo "🐍 Setting up Python with uv..."
