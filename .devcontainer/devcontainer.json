@@ -1,57 +1,26 @@
-{
-  "name": "Multi-Language Weather ETL",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
-  "workspaceFolder": "/workspaces/multiLanguage-weather-etl",
-  "remoteUser": "vscode",
+#!/bin/bash
+set -e  # Exit on error
+set -x  # Print commands (helpful for debugging)
 
-  "containerEnv": {
-    "DEBIAN_FRONTEND": "noninteractive",
-    "AIRFLOW_HOME": "/workspaces/multiLanguage-weather-etl/airflow",
-    "PYTHONUNBUFFERED": "1"
-  },
+echo "================================================"
+echo "🚀 Starting Minimal Devcontainer Setup"
+echo "================================================"
 
-  "features": {
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
-  },
+# Verify base environment
+echo "📦 Verifying Python Bullseye base..."
+python --version
+which python
 
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "REditorSupport.r",
-        "julialang.language-julia",
-        "GitHub.copilot",
-        "eamodio.gitlens",
-        "charliermarsh.ruff",
-        "ms-python.debugpy"
-      ],
-      "settings": {
-        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-        "python.formatting.provider": "black",
-        "python.linting.enabled": true,
-        "[julia]": {
-          "editor.defaultFormatter": "julialang.language-julia",
-          "editor.formatOnSave": true
-        },
-        "julia.environmentPath": "${workspaceFolder}",
-        "julia.useRevise": false,
-        "python.testing.pytestEnabled": true,
-        "python.testing.pytestArgs": ["tests"]
-      }
-    }
-  },
+echo "📦 Checking apt package manager..."
+sudo apt-get update
 
-  "onCreateCommand": "bash .codespaces/setup.sh",
-  "postCreateCommand": "",
-  "postStartCommand": "source /workspaces/multiLanguage-weather-etl/.venv/bin/activate && echo '✅ Python venv activated'",
+echo "📦 Installing essential build tools..."
+sudo apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    wget \
+    ca-certificates
 
-  "forwardPorts": [8080],
-  "portsAttributes": {
-    "8080": {
-      "label": "Airflow UI",
-      "onAutoForward": "notify"
-    }
-  }
-}
+echo "================================================"
+echo "✅ Base setup complete!"
+echo "================================================"
