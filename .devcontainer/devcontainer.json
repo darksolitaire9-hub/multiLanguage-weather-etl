@@ -1,8 +1,19 @@
 {
   "name": "Multi-Language Weather ETL",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
   "workspaceFolder": "/workspaces/multiLanguage-weather-etl",
   "remoteUser": "vscode",
+
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive",
+    "AIRFLOW_HOME": "/workspaces/multiLanguage-weather-etl/airflow",
+    "PYTHONUNBUFFERED": "1"
+  },
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
 
   "customizations": {
     "vscode": {
@@ -11,11 +22,10 @@
         "ms-python.vscode-pylance",
         "REditorSupport.r",
         "julialang.language-julia",
-        "ms-toolsai.jupyter",
-        "ms-toolsai.jupyter-keymap",
         "GitHub.copilot",
         "eamodio.gitlens",
-        "charliermarsh.ruff"
+        "charliermarsh.ruff",
+        "ms-python.debugpy"
       ],
       "settings": {
         "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
@@ -26,13 +36,16 @@
           "editor.formatOnSave": true
         },
         "julia.environmentPath": "${workspaceFolder}",
-        "jupyter.kernels.filter": ["julia", "python3", "ir"]
+        "julia.useRevise": false,
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": ["tests"]
       }
     }
   },
 
-  "postCreateCommand": "bash .codespaces/setup.sh",
-  "postStartCommand": "echo '✅ Setup complete! Activate venv with: source .venv/bin/activate' && echo 'Then start Airflow: airflow standalone'",
+  "onCreateCommand": "bash .codespaces/setup.sh",
+  "postCreateCommand": "",
+  "postStartCommand": "source /workspaces/multiLanguage-weather-etl/.venv/bin/activate && echo '✅ Python venv activated'",
 
   "forwardPorts": [8080],
   "portsAttributes": {
