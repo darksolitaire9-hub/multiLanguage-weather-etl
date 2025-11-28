@@ -5,8 +5,7 @@
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.11"
     },
-    "ghcr.io/rocker-org/devcontainer-features/r-apt:1": {
-      "version": "latest"
+    "ghcr.io/rocker-org/devcontainer-features/r-apt:latest": {
     },
     "ghcr.io/julialang/devcontainer-features/julia:1": {
       "channel": "release"
