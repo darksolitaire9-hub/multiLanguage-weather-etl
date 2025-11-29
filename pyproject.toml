@@ -8,7 +8,8 @@ authors = [
 dependencies = [
     "requests",
     "polars",
-    "pyarrow"
+    "pyarrow",
+    "apache-airflow>=3.0.0",
 ]
 
 [tool.setuptools.packages.find]
