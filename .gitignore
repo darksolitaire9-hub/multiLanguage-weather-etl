@@ -36,6 +36,7 @@ data/*.txt
 !visualizations
 !visualizations/*.R
 !visualizations/**/*.R
+!renv.lock
 
 # ===== JULIA =====
 *.jl.*.cov
