@@ -54,18 +54,19 @@ plot_shadow <- weather_data %>%
 media_dir <- here::here("airflow", "visualizations", "media")
 output_path <- file.path(media_dir, "weather_animation_shadow.mp4")
 
-# Abort if output directory exists
-if (dir.exists(media_dir)) {
-  stop(paste("Directory", media_dir, "already exists - Aborting to prevent overwrite."))
+# --- UPDATED LOGIC START ---
+# Ensure directory exists (create if missing, do nothing if exists)
+if (!dir.exists(media_dir)) {
+  dir.create(media_dir, recursive = TRUE)
+  cat(paste("Created directory:", media_dir, "\n"))
 }
 
-# Otherwise, create the directory
-dir.create(media_dir, recursive = TRUE)
-
-# Abort if output file exists
+# Remove old file if it exists (Overwrite logic)
 if (file.exists(output_path)) {
-  stop(paste("File already exists at", output_path, "- Aborting to prevent overwrite."))
+  warning(paste("File exists at", output_path, "- Overwriting..."))
+  file.remove(output_path)
 }
+# --- UPDATED LOGIC END ---
 
 # Save animation as MP4 video in airflow/visualizations/media
 anim_save(
