@@ -6,14 +6,12 @@
       "version": "3.11",
       "installTools": true
     },
-    "ghcr.io/rocker-org/devcontainer-features/r-apt:latest": {
-      // r-apt installs R from apt. It does NOT support a specific "version" key usually.
-      // We rely on our 3_r_setup.sh to fix the version if this installs the wrong one.
+    "ghcr.io/rocker-org/devcontainer-features/r-rig:1": {
+      "version": "4.4.2"
     },
     "ghcr.io/julialang/devcontainer-features/julia:1": {
       "channel": "release"
     },
-    // Add this to ensure we have the basic apt tools needed for our scripts immediately
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
       "configureZshAsDefaultShell": true,
@@ -31,7 +29,6 @@
       ]
     }
   },
-  // We point to a master script that runs your 1_system, 2_python, 3_r scripts in order
   "postCreateCommand": "bash .devcontainer/scripts/post_create.sh",
   "remoteUser": "vscode"
 }
