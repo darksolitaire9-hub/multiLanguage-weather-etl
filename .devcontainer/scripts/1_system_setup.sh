@@ -18,7 +18,9 @@ sudo apt-get install -y \
     libssl-dev \
     libxml2-dev \
     cmake \
-    pandoc
+    pandoc \
+    libudunits2-0 \
+    libgdal32
 
 # 3. Cleanup
 sudo apt-get clean

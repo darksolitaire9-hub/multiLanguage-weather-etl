@@ -7,8 +7,7 @@
     "terra",
     "raster",
     "sp",
-    "rgdal",
-    "transformr"
+    "rgdal"
   ],
   "package.dependency.fields": [
     "Imports",
