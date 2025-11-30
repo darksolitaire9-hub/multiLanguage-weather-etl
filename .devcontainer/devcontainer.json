@@ -23,9 +23,7 @@
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "REditorSupport.r",
-        "julialang.language-julia",
-        "ms-toolsai.jupyter"
+        "julialang.language-julia"
       ]
     }
   },
