@@ -1,7 +1,15 @@
 {
   "bioconductor.version": null,
   "external.libraries": [],
-  "ignored.packages": [],
+  "ignored.packages": [
+    "sf",
+    "units",
+    "terra",
+    "raster",
+    "sp",
+    "rgdal",
+    "transformr"
+  ],
   "package.dependency.fields": [
     "Imports",
     "Depends",
