@@ -29,6 +29,7 @@ data/*.xlsx
 data/*.txt
 /data
 # ===== R =====
+.Rprofile
 .Rhistory
 .RData
 .Rproj.user/
