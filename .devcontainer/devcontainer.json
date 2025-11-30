@@ -23,7 +23,8 @@
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "julialang.language-julia"
+        "julialang.language-julia",
+        "REditorSupport.r"
       ]
     }
   },
