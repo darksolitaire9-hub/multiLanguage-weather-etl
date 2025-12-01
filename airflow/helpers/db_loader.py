@@ -24,99 +24,119 @@
 #   - Safety: Rerunning the pipeline (e.g., after interruptions or updates) will not produce duplicates or overwrite prior results.
 #   - Professional data workflows prioritize data integrity and idempotency unless routine corrections are required (in which case, "REPLACE" logic would be used).
 #
+# Integration with Pydantic:
+#   - This module now accepts strictly typed `WeatherResponse` objects.
+#   - It uses Pydantic's validation guarantees to safely access data via dot notation.
+#
 # Usage:
 #   from helpers.db_loader import insert_weather_data
-#   insert_weather_data(DB_PATH, weather_data)
-#
-# Standalone test:
-#   python helpers/db_loader.py
+#   insert_weather_data(DB_PATH, weather_data_object)
 #
 # Dependencies:
 #   - sqlite3 (Python standard library)
-#   - helpers.geocode_utils, helpers.date_utils (for script-mode API fetch)
-#   - requests (for script-mode API fetch)
+#   - helpers.schemas (for type checking)
 # =====================================================
 
-# ---- [End] ----
 import sqlite3
 import os
+from helpers.schemas import WeatherResponse
 
-def insert_weather_data(db_path, weather_data):
+def insert_weather_data(db_path: str, weather_data: WeatherResponse):
     """
-    Inserts daily weather records into weather_daily table in SQLite DB.
+    Inserts daily weather records into the weather_daily table in SQLite DB.
+
+    This function transforms the columnar data from the Pydantic WeatherResponse 
+    object (lists of values) into row-based records for database insertion.
 
     Args:
         db_path (str): Path to the SQLite .db file.
-        weather_data (dict): Parsed Open-Meteo API response.
-            Expected format:
-            {
-                'daily': {
-                    'time': [...],  # list of date strings (YYYY-MM-DD)
-                    'temperature_2m_max': [...],  # list of daily max temp (float)
-                    'temperature_2m_min': [...],  # list of daily min temp (float)
-                    'weather_code': [...],        # list of WMO weather codes (int)
-                }
-            }
+        weather_data (WeatherResponse): Validated Pydantic data object containing daily weather series.
+            
     Side Effects:
-        Inserts each day's observations as a new record in 'weather_daily'.
-        If a date already exists (unique), record is ignored.
-        Prints count of attempted loads.
-
-    Returns:
-        None
+        - Creates the database directory if it does not exist.
+        - Inserts each day's observations as a new record in 'weather_daily'.
+        - If a date already exists (unique constraint), the record is ignored (Idempotency).
+        - Prints the count of successfully inserted rows.
     """
+    # Ensure the target directory exists
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
-    daily = weather_data.get('daily', {})
-    # Prepare records as tuples for insertion
-    records = list(zip(
-        daily.get('time', []),
-        daily.get('temperature_2m_max', []),
-        daily.get('temperature_2m_min', []),
-        daily.get('weather_code', [])
-    ))
+
+    # Access data directly via Pydantic dot notation (Clean & Safe)
+    daily = weather_data.daily
+    
+    # --- DATA PREPARATION ---
+    # We use 'or []' to handle Optional fields safely.
+    # If the API returned None for a field (e.g. because it wasn't requested),
+    # we treat it as an empty list. This ensures zip() creates 0 records
+    # instead of raising a TypeError, preventing the pipeline from crashing.
+    times = daily.time
+    temp_max = daily.temperature_2m_max or []
+    temp_min = daily.temperature_2m_min or []
+    w_codes  = daily.weather_code or []
+
+    # --- COLUMN TO ROW TRANSFORMATION ---
+    # The API provides independent lists: [Date1, Date2], [Temp1, Temp2]
+    # The DB requires rows: (Date1, Temp1, ...), (Date2, Temp2, ...)
+    # zip() performs this transposition, stopping at the shortest list length.
+    records = list(zip(times, temp_max, temp_min, w_codes))
 
     if not records:
-        print("No weather data to insert.")
+        print("⚠️ No valid weather records found to insert (lists were empty or mismatched).")
         return
 
+    # --- DATABASE TRANSACTION ---
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.executemany("""
-        INSERT OR IGNORE INTO weather_daily (date, temp_max, temp_min, weather_code)
-        VALUES (?, ?, ?, ?)
-    """, records)
-    conn.commit()
-    conn.close()
-    print(f"Inserted up to {len(records)} days into {db_path} (duplicates ignored)")
+    
+    try:
+        # Uses 'INSERT OR IGNORE' to maintain idempotency (skips existing dates)
+        cursor.executemany("""
+            INSERT OR IGNORE INTO weather_daily (date, temp_max, temp_min, weather_code)
+            VALUES (?, ?, ?, ?)
+        """, records)
+        
+        conn.commit()
+        print(f"✅ Inserted {cursor.rowcount} new days into {db_path} (duplicates ignored)")
+    
+    except sqlite3.Error as e:
+        print(f"❌ Database Error: {e}")
+    
+    finally:
+        conn.close()
 
 
+# =====================================================
+# Standalone Test Block
+# =====================================================
 if __name__ == "__main__":
-    from config.constants import DB_PATH, CITY_NAME, COUNTRY, WEATHER_API_URL, DAILY_VARIABLES, START_YEAR, TIMEZONE, NUM_YEARS, DIRECTION
+    from config.constants import (
+        DB_PATH, CITY_NAME, COUNTRY, WEATHER_API_URL, 
+        DAILY_VARIABLES, START_YEAR, TIMEZONE, NUM_YEARS, DIRECTION
+    )
     from helpers.geocode_utils import get_city_coordinates
     from helpers.date_utils import get_interval_start_to_end_dates
     from helpers.db_utils import create_weather_table
-    import requests
+    # Note: We import the Pydantic-enabled fetcher now!
+    from helpers.weather_api import fetch_weather_data 
 
-    # Ensure the database and table exist before loading
+    print("--- Starting DB Loader Test ---")
+
+    # 1. Ensure the database and table exist
     create_weather_table(DB_PATH)
 
-    # Prepare date range for the test fetch (using config)
+    # 2. Prepare date range
     start_date, end_date = get_interval_start_to_end_dates(START_YEAR, NUM_YEARS, DIRECTION)
 
-    # Fetch weather data for the configured city/country
-    lat, lon = get_city_coordinates(CITY_NAME, COUNTRY)
-    params = {
-        'latitude': lat,
-        'longitude': lon,
-        'start_date': start_date,
-        'end_date': end_date,
-        'daily': ','.join(DAILY_VARIABLES),
-        'timezone': TIMEZONE,
-    }
-    print("Fetching weather data...")
-    response = requests.get(WEATHER_API_URL, params=params, timeout=60)
-    weather_data = response.json()
+    # 3. Fetch weather data (Returns a WeatherResponse object now)
+    print(f"Fetching weather data for {CITY_NAME}...")
+    weather_object = fetch_weather_data(
+        CITY_NAME, COUNTRY, WEATHER_API_URL, 
+        start_date, end_date, DAILY_VARIABLES, TIMEZONE
+    )
 
-    # Test the insert_weather_data function
-    print("Loading weather data into database...")
-    insert_weather_data(DB_PATH, weather_data)
+    if weather_object:
+        # 4. Test the insert function with the Object
+        print("Loading validated weather data into database...")
+        insert_weather_data(DB_PATH, weather_object)
+    else:
+        print("❌ Test Failed: Could not fetch weather data.")
