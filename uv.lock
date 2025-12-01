@@ -1252,6 +1252,7 @@ dependencies = [
     { name = "apache-airflow" },
     { name = "polars" },
     { name = "pyarrow" },
+    { name = "pydantic" },
     { name = "requests" },
 ]
 
@@ -1260,6 +1261,7 @@ requires-dist = [
     { name = "apache-airflow", specifier = ">=3.0.0" },
     { name = "polars" },
     { name = "pyarrow" },
+    { name = "pydantic", specifier = ">=2.12.5" },
     { name = "requests" },
 ]
 

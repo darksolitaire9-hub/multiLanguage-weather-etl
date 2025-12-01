@@ -9,10 +9,13 @@ from helpers.db_loader import insert_weather_data
 from helpers.weather_api import fetch_weather_data
 from helpers.date_utils import get_interval_start_to_end_dates
 from helpers.sqlite_utils import export_sqlite_to_csv_with_polars
+# Import Pydantic Schema for reconstruction
+from helpers.schemas import WeatherResponse
 
 from airflow.decorators import dag, task
 from airflow.operators.bash import BashOperator
 from datetime import datetime
+
 
 """
 Weather ETL Full Pipeline DAG
@@ -58,20 +61,41 @@ def weather_etl_full_pipeline_dag():
     # 3. Fetch weather data from API
     @task()
     def t_fetch_weather_data(dates):
-        """Call weather API and fetch data for specified date range"""
-        weather_data = fetch_weather_data(
+        """
+        Call weather API and fetch data for specified date range.
+        Returns a Dict (serialized from Pydantic model) for safe Airflow XCom usage.
+        """
+        weather_obj = fetch_weather_data(
             CITY_NAME, COUNTRY, WEATHER_API_URL,
             dates['start_date'], dates['end_date'], DAILY_VARIABLES
         )
-        print(f"Fetched weather data for {CITY_NAME}, {COUNTRY}")
-        return weather_data
+        
+        if weather_obj:
+            print(f"Fetched and validated weather data for {CITY_NAME}, {COUNTRY}")
+            # Serialize Pydantic Object -> Dictionary for Airflow XCom
+            return weather_obj.model_dump()
+            
+        print("Warning: No weather data fetched.")
+        return None
 
     # 4. Insert collected weather data into DB
     @task()
-    def t_insert_weather_data(weather_data):
-        """Insert fetched weather data into database"""
-        insert_weather_data(DB_PATH, weather_data)
-        print("Weather data inserted.")
+    def t_insert_weather_data(weather_data_dict):
+        """
+        Reconstructs Pydantic object from Dict and inserts into database.
+        """
+        if not weather_data_dict:
+            print("No data to insert.")
+            return
+
+        # Reconstruct Object from Dict (Strict Type Check)
+        try:
+            weather_obj = WeatherResponse.model_validate(weather_data_dict)
+            insert_weather_data(DB_PATH, weather_obj)
+            print("Weather data inserted successfully.")
+        except Exception as e:
+            print(f"Failed to insert weather data: {e}")
+            raise e
 
     # 5. Export DB to CSV using Polars (for R/Julia downstream use)
     @task()
